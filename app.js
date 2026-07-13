@@ -12,9 +12,17 @@
   const DAY = 86400000;
   const daysAgo = (n) => new Date(Date.now() - n * DAY);
   const dateKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  const fmtDate = (d) =>
-    d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
-  const fmtShort = (d) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  const fmtDate = (d) => d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
+  const fmtTime = (d) =>
+    d.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", hour12: true }).replace(/\s?(am|pm)/i, " $1").toLowerCase();
+
+  function entryLabel(d) {
+    const today = dateKey(new Date());
+    const yesterday = dateKey(daysAgo(1));
+    if (dateKey(d) === today) return `Today · ${fmtTime(d)}`;
+    if (dateKey(d) === yesterday) return "Yesterday";
+    return d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "long" });
+  }
 
   function greeting() {
     const h = new Date().getHours();
@@ -32,17 +40,44 @@
     toastTimer = setTimeout(() => (t.hidden = true), 2200);
   }
 
+  // ---------- icons (line style, stroke = currentColor) ----------
+  const stroke = (paths, extra) =>
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths}${extra || ""}</svg>`;
+  const I = {
+    back: stroke('<path d="M15 5l-7 7 7 7" stroke-width="2.2"/>'),
+    home: stroke('<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>'),
+    talk: stroke('<path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"/>'),
+    journal: stroke('<path d="M5 4h13a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5z"/><path d="M5 4v17"/><path d="M9 9h6M9 13h4"/>'),
+    you: stroke('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/>'),
+    heart: stroke('<path d="M12 20.5s-7.5-4.7-9.5-9.3C1 7.5 3.5 4.5 6.8 4.5c2.2 0 3.9 1.2 5.2 3 1.3-1.8 3-3 5.2-3 3.3 0 5.8 3 4.3 6.7-2 4.6-9.5 9.3-9.5 9.3z"/>'),
+    heartFill: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.7-9.5-9.3C1 7.5 3.5 4.5 6.8 4.5c2.2 0 3.9 1.2 5.2 3 1.3-1.8 3-3 5.2-3 3.3 0 5.8 3 4.3 6.7-2 4.6-9.5 9.3-9.5 9.3z"/></svg>',
+    comment: stroke('<path d="M21 11.5a7.5 7.5 0 0 1-7.5 7.5H4.5l1.4-2.8A7.5 7.5 0 1 1 21 11.5z"/>'),
+    star: stroke('<path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 16.9l-5.3 2.7 1-5.8-4.2-4.1 5.9-.9z"/>'),
+    sun: stroke('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/>'),
+    ring: stroke('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.8"/><path d="M5.7 5.7l3.6 3.6M14.7 14.7l3.6 3.6M18.3 5.7l-3.6 3.6M9.3 14.7l-3.6 3.6"/>'),
+    phone: stroke('<path d="M21.5 16.9v3a1.8 1.8 0 0 1-2 1.8 18.8 18.8 0 0 1-8.2-2.9 18.4 18.4 0 0 1-5.7-5.7A18.8 18.8 0 0 1 2.7 4.9a1.8 1.8 0 0 1 1.8-2h3a1.8 1.8 0 0 1 1.8 1.5c.1.9.3 1.8.6 2.7a1.8 1.8 0 0 1-.4 1.9L8.2 10.3a14.7 14.7 0 0 0 5.5 5.5l1.3-1.3a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.5 2.7.6a1.8 1.8 0 0 1 1.9 2.2z"/>'),
+    lock: stroke('<rect x="5" y="11" width="14" height="9.5" rx="2.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>'),
+    shield: stroke('<path d="M12 3l7.5 3v5.2c0 4.8-3.5 8-7.5 10-4-2-7.5-5.2-7.5-10V6z"/>'),
+    trash: stroke('<path d="M4 6.5h16M9.5 6.5V4.8A1.3 1.3 0 0 1 10.8 3.5h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7M6.5 6.5l1 13a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-13"/>'),
+    memory: stroke('<rect x="4.5" y="3.5" width="15" height="17" rx="2.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/>'),
+    info: stroke('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/>'),
+    pencil: stroke('<path d="M16.7 3.8a2.2 2.2 0 0 1 3.1 3.1L7.5 19.2 3.5 20.5l1.3-4z"/>'),
+    up: stroke('<path d="M12 19V5.5M5.5 12 12 5.5 18.5 12" stroke-width="2.2"/>'),
+    check: stroke('<path d="M5 12.5l4.5 4.5L19 7.5" stroke-width="2.4"/>'),
+    plus: stroke('<path d="M12 5v14M5 12h14" stroke-width="2.2"/>'),
+    globe: stroke('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c-2.5 2.6-3.8 5.7-3.8 9s1.3 6.4 3.8 9c2.5-2.6 3.8-5.7 3.8-9S14.5 5.6 12 3z"/>'),
+  };
+  // brand smile: arc + dot
+  const smile = (color) =>
+    `<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="2" fill="${color}"/><path d="M6 12c1.7 2.8 3.9 4.2 6 4.2s4.3-1.4 6-4.2" stroke="${color}" stroke-width="2.6" stroke-linecap="round"/></svg>`;
+  const logoSquare = (size) =>
+    `<span style="display:inline-flex; width:${size}px; height:${size}px; background:var(--primary); border-radius:${Math.round(size * 0.3)}px; align-items:center; justify-content:center"><span style="width:${Math.round(size * 0.72)}px; height:${Math.round(size * 0.72)}px; display:flex">${smile("#fff")}</span></span>`;
+
   // ---------- mood + mock data ----------
-  const MOODS = [
-    { label: "Rough", emoji: "😞" },
-    { label: "Low", emoji: "😕" },
-    { label: "Okay", emoji: "😐" },
-    { label: "Good", emoji: "🙂" },
-    { label: "Great", emoji: "😄" },
-  ];
+  const MOODS = ["Rough", "Low", "Okay", "Good", "Great"];
 
   function seedCheckins() {
-    // one per day for the last 7 days (index 6 = today)
+    // one per day for the last 7 days (last = today)
     return [1, 2, 1, 3, 2, 3, 2].map((mood, i) => ({
       date: dateKey(daysAgo(6 - i)),
       mood,
@@ -50,45 +85,48 @@
     }));
   }
 
+  function at(d, h, m) { const x = new Date(d); x.setHours(h, m, 0, 0); return x; }
+
   function seedJournal() {
     let id = 1;
     return [
-      { d: 1, title: "A slower evening", text: "Made chai and sat by the window for a while. No phone, no plans. It felt strange at first, then really nice. I want more evenings like this." },
-      { d: 2, title: "Office was a lot today", text: "Back-to-back calls and the review got pushed again. I noticed I was holding my breath during the standup. Writing it down here so it stops circling in my head." },
-      { d: 4, title: "Called Amma", text: "We talked for almost an hour. She told the same stories she always tells, and honestly I didn't mind at all. Felt lighter after." },
-      { d: 5, title: "Couldn't sleep", text: "Kept thinking about the EMI and whether I should have taken the other offer. 2am thoughts are rarely kind. Tomorrow me can deal with it." },
-      { d: 7, title: "Small win", text: "Went for a walk before work instead of scrolling. Just 20 minutes. The day felt a little easier to carry." },
-    ].map((e) => ({ id: id++, date: daysAgo(e.d), title: e.title, text: e.text }));
+      { date: at(daysAgo(0), 21, 40), title: "A calmer evening", mood: 2, text: "Tried the breathing thing before dinner. Four slow breaths, like Nijo suggested.\n\nFelt a bit lighter after writing it down. The day didn't change, but I did, a little. Want to try the same tomorrow before the evening rush hits." },
+      { date: at(daysAgo(1), 22, 5), title: "Work spilled over again", mood: 1, text: "Long day. Back-to-back calls and the review got pushed again.\n\nNaming what drained me actually helped me let some of it go." },
+      { date: at(daysAgo(2), 20, 15), title: "Small wins", mood: 3, text: "Called Amma. We laughed about nothing for an hour. Keep doing this." },
+      { date: at(daysAgo(4), 1, 50), title: "Couldn't sleep", mood: 1, text: "Kept thinking about the EMI and whether I should have taken the other offer. 2am thoughts are rarely kind. Tomorrow me can deal with it." },
+      { date: at(daysAgo(6), 19, 30), title: "A slower evening", mood: 3, text: "Made chai and sat by the window for a while. No phone, no plans. It felt strange at first, then really nice." },
+    ].map((e) => ({ id: id++, ...e }));
   }
 
   function seedPosts() {
     let id = 1;
     const mk = (topic, text, likes, time, replies) => ({
       id: id++, topic, text, likes, liked: false, time,
-      replies: replies.map((r) => ({ text: r, time: "earlier" })),
+      replies: replies.map(([text, rtime]) => ({ text, time: rtime })),
     });
     return [
-      mk("Work", "Does anyone else feel guilty logging off at 6 even when the work is done? Like I have to be seen online to be taken seriously.", 24, "2h ago", [
-        "Every single day. I started blocking my calendar after 6 and it helped a little.",
-        "The guilt fades once you do it for a few weeks. Your rest is part of the job.",
+      mk("Work", "Started saying no to late meetings this week. Still feels uncomfortable, but my evenings are mine again — and I think I'm sleeping better.", 24, "2h", [
+        ["This is so good to hear. Boundaries are hard but worth it.", "1h"],
+        ["Needed to read this today. Going to try the same.", "40m"],
+        ["What helped you start? I freeze every time.", "25m"],
       ]),
-      mk("Anxiety", "My heart races before every team meeting, even ones where I don't have to speak. Just knowing it's coming ruins my morning.", 41, "5h ago", [
-        "I do a slow 4-7-8 breath in the minutes before. Doesn't fix it but takes the edge off.",
-        "Same here. It helped me to write one line I could say if called on, so I stop rehearsing everything.",
+      mk("Anxiety", "Reminder to anyone spiralling tonight: you've survived every hard day so far. Breathe.", 61, "5h", [
+        ["Thank you. Saving this for 2am.", "3h"],
+        ["Breathe in, breathe out. We've got this.", "2h"],
       ]),
-      mk("Work", "Got passed over for a promotion I was promised. Smiling through the day but honestly it stings a lot.", 33, "8h ago", [
-        "That's a real loss, it's okay for it to sting. You don't have to perform being fine.",
+      mk("Work", "Got passed over for a promotion I was promised. Smiling through the day but honestly it stings a lot.", 33, "8h", [
+        ["That's a real loss, it's okay for it to sting. You don't have to perform being fine.", "6h"],
       ]),
-      mk("Anxiety", "Moved to a new city for my job and the evenings are the hardest. Everyone seems to already have their people.", 56, "1d ago", [
-        "Took me almost a year to find my people after moving. Be gentle with yourself.",
-        "The evenings get softer. Until then, this corner of the internet counts too.",
+      mk("Relationships", "Parents keep asking about marriage every single call. I love them but I've started dreading the phone ringing.", 47, "1d", [
+        ["You're allowed to set a gentle boundary. 'I'll share when there's news' worked for me.", "1d"],
+        ["Felt this deeply. You're not alone.", "20h"],
       ]),
-      mk("Sleep", "I'm exhausted all day but the moment I lie down my brain starts a full review of my life choices.", 48, "1d ago", [
-        "Keeping a notepad by the bed helped me — I 'park' the thought and deal with it tomorrow.",
+      mk("Wins", "Went for a morning walk before work instead of scrolling. Small thing, but the whole day felt lighter.", 29, "1d", [
+        ["The smallest wins are the realest ones.", "22h"],
       ]),
-      mk("Family", "Parents keep asking about marriage every single call. I love them but I've started dreading the phone ringing.", 62, "2d ago", [
-        "You're allowed to set a gentle boundary. 'I'll share when there's news' worked for me.",
-        "Felt this deeply. You're not alone.",
+      mk("Other", "Moved to a new city for my job and the evenings are the hardest. Everyone seems to already have their people.", 56, "2d", [
+        ["Took me almost a year to find my people after moving. Be gentle with yourself.", "2d"],
+        ["The evenings get softer. Until then, this corner of the internet counts too.", "1d"],
       ]),
     ];
   }
@@ -103,7 +141,7 @@
   const state = {
     screen: "welcome",
     params: {},
-    authMode: "phone", // or "email"
+    authMode: "phone",
     phone: "",
     language: "Hinglish",
     consent: false,
@@ -112,7 +150,7 @@
     checkins: seedCheckins(),
     journal: seedJournal(),
     posts: seedPosts(),
-    chat: [], // {role: "user"|"assistant", content}
+    chat: [],
     typing: false,
     cannedIdx: 0,
     communityTopic: "All",
@@ -120,6 +158,7 @@
     checkinNote: "",
     plan: "annual",
     reportReason: null,
+    resendLeft: 30,
     nextJournalId: 100,
     nextPostId: 100,
   };
@@ -194,84 +233,102 @@
   }
 
   // ---------- shared pieces ----------
-  const ICONS = {
-    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
-    talk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"/></svg>',
-    journal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h13a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5z"/><path d="M5 4v17"/><path d="M9 9h6M9 13h4"/></svg>',
-    you: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg>',
-  };
-
   function bottomNav(active) {
     const items = [
-      ["home", "Home", "home"],
-      ["chat", "Talk", "talk"],
-      ["journal", "Journal", "journal"],
-      ["you", "You", "you"],
+      ["home", "Home", I.home],
+      ["chat", "Talk", I.talk],
+      ["journal", "Journal", I.journal],
+      ["you", "You", I.you],
     ];
     return (
       '<div class="bottom-nav">' +
       items
         .map(
           ([scr, label, icon]) =>
-            `<button class="nav-item ${active === scr ? "active" : ""}" onclick="A.go('${scr}')">${ICONS[icon]}<span>${label}</span></button>`
+            `<button class="nav-item ${active === scr ? "active" : ""}" onclick="A.go('${scr}')">${icon}<span>${label}</span></button>`
         )
         .join("") +
       "</div>"
     );
   }
 
-  function header(title, backTo, extra) {
+  const backBtn = (js) => `<button class="back-btn" onclick="${js}">${I.back}</button>`;
+
+  // header: plain chevron + optional centered caption title + optional right action
+  function header(backJs, title, action) {
     return `<div class="screen-header">
-      ${backTo ? `<button class="back-btn" onclick="A.go('${backTo}')">←</button>` : ""}
-      <h2>${esc(title)}</h2>${extra || ""}
+      ${backJs ? backBtn(backJs) : ""}
+      ${title ? `<span class="header-title">${title}</span>` : ""}
+      ${action || ""}
     </div>`;
   }
+
+  const checkins7 = () => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const key = dateKey(daysAgo(i));
+      const todays = state.checkins.filter((c) => c.date === key);
+      days.push({ key, d: daysAgo(i), offset: i, mood: todays.length ? todays[todays.length - 1].mood : null });
+    }
+    return days;
+  };
+
+  const streak = () => {
+    let s = 0;
+    for (let i = 0; ; i++) {
+      if (state.checkins.some((c) => c.date === dateKey(daysAgo(i)))) s++;
+      else break;
+    }
+    return s;
+  };
 
   // ---------- screens ----------
   const screens = {};
 
   screens.welcome = () => `
-    <div class="screen centered">
-      <div class="logo">🙂</div>
-      <div class="stack-4">
-        <h1>Nijo</h1>
-        <p class="sub">A quiet place to be heard</p>
-      </div>
-      <div style="height:12px"></div>
+    <div class="screen center" style="text-align:center">
+      <div class="spacer"></div>
+      <div>${logoSquare(72)}</div>
+      <div style="height:4px"></div>
+      <h1>A quiet place to be heard</h1>
+      <p class="sub">Talk it through, reflect, and feel a little lighter — in the language you think in.</p>
+      <div class="spacer"></div>
       ${
         state.authMode === "phone"
-          ? `<div class="phone-input"><span>+91</span><input id="phone" type="tel" placeholder="Your phone number" value="${esc(state.phone)}" /></div>`
-          : `<input id="phone" type="email" placeholder="Your email address" />`
+          ? `<div class="phone-input" style="text-align:left"><span>+91</span><input id="phone" type="tel" placeholder="Phone number" value="${esc(state.phone)}" /></div>`
+          : `<input id="phone" type="email" placeholder="Email address" />`
       }
       <button class="btn" onclick="A.continueWelcome()">Continue</button>
       <button class="link" onclick="A.toggleAuth()">${state.authMode === "phone" ? "Continue with email" : "Continue with phone"}</button>
+      <p class="caption">By continuing, you agree to our Terms and Privacy Policy.</p>
     </div>`;
 
   screens.verify = () => `
     <div class="screen">
-      ${header("", "welcome")}
+      ${header("A.go('welcome')")}
       <div class="stack-4">
         <h1>Verify your number</h1>
-        <p class="sub">We sent a 6-digit code to ${state.authMode === "phone" ? "+91 " + esc(state.phone || "your number") : "your email"}.</p>
+        <p class="sub">Enter the 6-digit code sent to ${state.authMode === "phone" ? "+91 " + esc(state.phone || "your number") : "your email"}.</p>
       </div>
       <div class="otp-row">
         ${[0, 1, 2, 3, 4, 5].map((i) => `<input class="otp-box" id="otp${i}" maxlength="1" inputmode="numeric" oninput="A.otpNext(${i})" />`).join("")}
       </div>
+      <p class="caption" id="resend">${state.resendLeft > 0 ? "Resend code in 0:" + String(state.resendLeft).padStart(2, "0") : ""}</p>
+      <div class="spacer"></div>
       <button class="btn" onclick="A.go('language')">Verify</button>
-      <button class="link" onclick="A.toast('Code sent again')">Resend code</button>
     </div>`;
 
   screens.language = () => {
     const from = state.params.from;
     const langs = [
-      ["हिंदी · Hindi", "Hindi", ""],
-      ["Hinglish", "Hinglish", '<span class="badge">Recommended</span>'],
-      ["മലയാളം · Malayalam", "Malayalam", ""],
-      ["English", "English", ""],
+      ["हिंदी · Hindi", "Hindi", false],
+      ["Hinglish", "Hinglish", true],
+      ["മലയാളം · Malayalam", "Malayalam", false],
+      ["English", "English", false],
     ];
     return `
     <div class="screen">
-      ${header("", from === "settings" ? "settings" : "verify")}
+      ${header(from === "settings" ? "A.go('settings')" : "A.go('verify')")}
       <div class="stack-4">
         <h1>Which language feels like home?</h1>
         <p class="sub">You can switch anytime.</p>
@@ -279,10 +336,10 @@
       <div class="stack-12">
         ${langs
           .map(
-            ([label, val, badge]) => `
+            ([label, val, rec]) => `
           <div class="select-row ${state.language === val ? "selected" : ""}" onclick="A.setLang('${val}')">
-            <span>${label} ${badge}</span>
-            <span class="dot-check">${state.language === val ? "✓" : ""}</span>
+            <span class="hrow" style="gap:10px">${label} ${rec ? '<span class="badge">Recommended</span>' : ""}</span>
+            <span class="check">${I.check.replace("<svg", '<svg width="18" height="18"')}</span>
           </div>`
           )
           .join("")}
@@ -294,182 +351,227 @@
 
   screens.privacy = () => `
     <div class="screen">
-      ${header("", "language")}
+      ${header("A.go('language')")}
+      <span class="icon-plain" style="color:var(--primary)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v5.2c0 4.8-3.5 8-7.5 10-4-2-7.5-5.2-7.5-10V6z"/></svg></span>
       <div class="stack-4">
         <h1>Your privacy comes first</h1>
-        <p class="sub">Nijo is built to comply with India's DPDP Act 2023. What you share stays yours.</p>
+        <p class="sub">Nijo follows India's DPDP Act. In plain words:</p>
       </div>
-      <div class="stack-12">
-        <div class="row-item" style="cursor:default"><div class="icon">🔒</div><div class="grow"><strong>Private by default</strong><div class="small sub">Your conversations and journal are never shared.</div></div></div>
-        <div class="row-item" style="cursor:default"><div class="icon">🕊️</div><div class="grow"><strong>You stay in control</strong><div class="small sub">Export or delete your data anytime from Settings.</div></div></div>
-        <div class="row-item" style="cursor:default"><div class="icon">🇮🇳</div><div class="grow"><strong>Stored responsibly</strong><div class="small sub">Handled under India's data protection law.</div></div></div>
+      <div class="card stack-12" style="padding:20px">
+        ${[
+          [I.lock, "Private to you", "Your conversations are encrypted and never sold."],
+          [I.memory, "Store only what helps memory", "We keep just enough context to remember you."],
+          [I.trash, "Delete anytime", "Erase your data whenever you choose."],
+        ]
+          .map(
+            ([icon, t, s]) => `
+          <div class="hrow" style="align-items:flex-start">
+            <span class="icon-plain" style="margin-top:3px">${icon}</span>
+            <div class="grow"><h3 style="font-weight:600; font-size:15px">${t}</h3><p class="small sub">${s}</p></div>
+          </div>`
+          )
+          .join("")}
       </div>
       <div class="spacer"></div>
       <label class="checkbox-row">
         <input type="checkbox" ${state.consent ? "checked" : ""} onchange="A.setConsent(this.checked)" />
-        <span class="small sub">I agree to Nijo's terms and understand how my data is used.</span>
+        <span class="small">I agree to the Privacy Policy and how my data is used.</span>
       </label>
       <button class="btn" ${state.consent ? "" : "disabled"} onclick="A.go('disclaimer')">Agree &amp; continue</button>
     </div>`;
 
   screens.disclaimer = () => `
     <div class="screen">
-      ${header("", "privacy")}
+      ${header("A.go('privacy')")}
+      <span class="icon-plain" style="color:var(--primary)">${I.heart.replace("<svg", '<svg width="30" height="30"')}</span>
       <div class="stack-4">
         <h1>A companion, not a clinic</h1>
-        <p class="sub">Nijo is here to listen and keep you company. It isn't a therapist, and it can't give medical advice or diagnosis.</p>
+        <p class="sub">Nijo is here to listen and help you reflect. It isn't a therapist, doctor, or emergency service, and it can't replace professional care.</p>
       </div>
-      <div class="card" style="background:var(--tint); border-color:var(--primary)">
-        <strong>If you're going through a crisis</strong>
-        <p class="small sub" style="margin-top:4px">Please reach out to a trained person right away. Free, confidential helplines are available 24x7.</p>
-        <button class="link" style="margin-top:8px; padding:0" onclick="A.go('gethelp', {from:'disclaimer'})">See helplines →</button>
+      <div class="callout tappable" onclick="A.go('gethelp', {from:'disclaimer'})">
+        ${I.info}
+        <span>If you're in crisis or thinking about harming yourself, please contact a local helpline or someone you trust right now.</span>
       </div>
       <div class="spacer"></div>
       <button class="btn" onclick="A.go('home')">I understand</button>
     </div>`;
 
   screens.home = () => {
-    const today = new Date();
+    const todayCheckin = state.checkins.filter((c) => c.date === dateKey(new Date())).pop();
     return `
-    <div class="screen with-nav">
-      <div class="stack-4">
-        <h1>${greeting()}</h1>
-        <p class="caption">${fmtDate(today)}</p>
+    <div class="screen">
+      <div class="hrow">
+        <div class="stack-4 grow">
+          <h1>${greeting()}</h1>
+          <p class="caption">${fmtDate(new Date())}</p>
+        </div>
+        ${logoSquare(42)}
       </div>
       <div class="card">
-        <h2>How are you feeling right now?</h2>
+        <h3>How are you feeling right now?</h3>
         <div class="mood-dots">
-          ${MOODS.map((m, i) => `<button class="mood-dot" title="${m.label}" onclick="A.startCheckin(${i})">${m.emoji}</button>`).join("")}
+          ${MOODS.map((m, i) => `<button class="mood-dot ${todayCheckin && todayCheckin.mood === i ? "active" : ""}" title="${m}" onclick="A.startCheckin(${i})"></button>`).join("")}
         </div>
       </div>
-      <div class="card tappable" onclick="A.go('chat')">
-        <h2>Talk to Nijo</h2>
-        <p class="sub small">I'm here whenever you want to talk.</p>
-      </div>
-      <div class="card tappable" onclick="A.go('journal')">
-        <h2>Today's journal</h2>
-        <p class="sub small">Write a short reflection.</p>
-      </div>
-      <div class="card tappable" onclick="A.go('paywall')">
-        <h2>${state.plus ? "Nijo Plus" : "Try Nijo Plus"} <span class="badge solid">Plus</span></h2>
-        <p class="sub small">${state.plus ? "You're a member. Thank you for being here." : "Unlock unlimited conversations."}</p>
-      </div>
+      ${[
+        ["chat", "Talk to Nijo", "I'm here whenever you want to talk.", ""],
+        ["journal", "Today's journal", "Write a short reflection.", ""],
+        ["paywall", state.plus ? "Nijo Plus" : "Try Nijo Plus", state.plus ? "You're a member. Thank you for being here." : "Unlock unlimited conversations.", '<span class="badge">Plus</span>'],
+      ]
+        .map(
+          ([scr, t, s, badge]) => `
+        <div class="card tappable hrow" onclick="A.go('${scr}')">
+          <div class="grow stack-4">
+            <h3>${t} ${badge}</h3>
+            <p class="caption" style="font-size:13px">${s}</p>
+          </div>
+          <span class="chev" style="color:var(--text-3)">›</span>
+        </div>`
+        )
+        .join("")}
+      <div class="spacer"></div>
     </div>
     ${bottomNav("home")}`;
   };
 
   screens.chat = () => `
-    <div class="screen with-nav" style="gap:8px">
-      ${header("Nijo", null)}
+    <div class="screen" style="gap:8px">
+      ${header("A.go('home')", `Nijo<br><span style="font-size:12px">here for you</span>`)}
       <div class="chat-scroll" id="chat-scroll">
-        <div class="bubble nijo">Hi, I'm Nijo 🙂 This is your space — what's on your mind today?</div>
+        <div class="bubble nijo">Hi, I'm really glad you're here. What's on your mind today?</div>
         ${state.chat
           .map((m) => `<div class="bubble ${m.role === "user" ? "user" : "nijo"}">${esc(m.content)}</div>`)
           .join("")}
         ${state.typing ? '<div class="bubble nijo"><span class="typing"><span></span><span></span><span></span></span></div>' : ""}
       </div>
       <div class="chat-input-row">
-        <textarea id="chat-text" rows="1" placeholder="Say anything…" onkeydown="A.chatKey(event)"></textarea>
-        <button class="send-btn" onclick="A.sendChat()" ${state.typing ? "disabled" : ""}>➤</button>
+        <textarea id="chat-text" rows="1" placeholder="Message Nijo…" onkeydown="A.chatKey(event)"></textarea>
+        <button class="send-btn" onclick="A.sendChat()" ${state.typing ? "disabled" : ""}>${I.up}</button>
       </div>
-    </div>
-    ${bottomNav("chat")}`;
+    </div>`;
 
   screens.checkin = () => `
     <div class="screen">
-      ${header("", "home")}
-      <h1>How are you feeling?</h1>
+      ${header("A.go('home')")}
+      <div class="stack-4">
+        <h1>How are you feeling?</h1>
+        <p class="sub">Right now, in this moment.</p>
+      </div>
       <div class="chip-row">
         ${MOODS.map(
-          (m, i) =>
-            `<button class="chip ${state.checkinMood === i ? "selected" : ""}" onclick="A.pickMood(${i})">${m.emoji} ${m.label}</button>`
+          (m, i) => `<button class="chip ${state.checkinMood === i ? "selected" : ""}" onclick="A.pickMood(${i})">${m}</button>`
         ).join("")}
       </div>
-      <textarea id="checkin-note" rows="4" placeholder="Add a note (optional)">${esc(state.checkinNote)}</textarea>
+      <p class="caption" style="margin-top:6px">Add a note (optional)</p>
+      <textarea id="checkin-note" rows="4" placeholder="What's behind that feeling?">${esc(state.checkinNote)}</textarea>
       <div class="spacer"></div>
-      <button class="btn" ${state.checkinMood === null ? "disabled" : ""} onclick="A.saveCheckin()">Check in</button>
+      <button class="btn" ${state.checkinMood === null ? "disabled" : ""} onclick="A.saveCheckin()">Save check-in</button>
     </div>`;
 
   screens.checkinDone = () => `
     <div class="screen centered">
-      <div class="logo">✓</div>
+      <div class="spacer"></div>
+      <div class="confirm-circle">${I.check}</div>
       <div class="stack-4">
         <h1>Checked in</h1>
-        <p class="sub">Noted. Thank you for pausing with yourself today.</p>
+        <p class="sub">Thanks for taking a moment for yourself.</p>
+        <p class="caption">You've checked in ${streak()} day${streak() === 1 ? "" : "s"} in a row.</p>
       </div>
-      <button class="btn" onclick="A.go('home')">Done</button>
+      <div class="spacer"></div>
+      <button class="btn" style="width:100%" onclick="A.go('home')">Done</button>
     </div>`;
 
-  screens.journal = () => `
-    <div class="screen with-nav">
-      ${header("Journal", null, `<button class="btn compact" onclick="A.go('journalEdit')">New</button>`)}
+  screens.journal = () => {
+    const entries = state.journal.slice().sort((a, b) => b.date - a.date);
+    return `
+    <div class="screen">
+      <div class="hrow">
+        <div class="stack-4 grow">
+          <h1>Journal</h1>
+          <p class="caption">${entries.length} entr${entries.length === 1 ? "y" : "ies"} · ${streak()}-day streak</p>
+        </div>
+        <button class="btn compact" onclick="A.go('journalEdit')">${I.plus.replace("<svg", '<svg width="15" height="15"')} New</button>
+      </div>
       <div class="stack-12">
-        ${state.journal
-          .slice()
-          .sort((a, b) => b.date - a.date)
+        ${entries
           .map(
             (e) => `
-          <div class="card tappable" onclick="A.go('journalRead', {id:${e.id}})">
-            <p class="caption">${fmtShort(e.date)}</p>
-            <h2>${esc(e.title)}</h2>
-            <p class="sub small" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap">${esc(e.text)}</p>
+          <div class="card tappable" onclick="A.go('journalRead', {id:${e.id}})" style="position:relative">
+            <span style="position:absolute; top:20px; right:20px; width:7px; height:7px; border-radius:50%; background:var(--primary)"></span>
+            <p class="caption">${entryLabel(e.date)}</p>
+            <h3 style="margin:2px 0">${esc(e.title)}</h3>
+            <p class="sub small" style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden">${esc(e.text)}</p>
           </div>`
           )
           .join("")}
       </div>
+      <div class="spacer"></div>
     </div>
     ${bottomNav("journal")}`;
+  };
 
-  screens.journalEdit = () => `
+  screens.journalEdit = () => {
+    const e = state.params.id ? state.journal.find((x) => x.id === state.params.id) : null;
+    return `
     <div class="screen">
-      ${header("New entry", "journal")}
-      <input type="text" id="j-title" placeholder="Title" />
-      <textarea id="j-text" rows="10" placeholder="What's on your mind?" style="flex:1"></textarea>
-      <button class="btn" onclick="A.saveJournal()">Save</button>
+      ${header(
+        e ? `A.go('journalRead', {id:${e.id}})` : "A.go('journal')",
+        entryLabel(e ? e.date : new Date()),
+        `<button class="header-action" onclick="A.saveJournal(${e ? e.id : "null"})">Save</button>`
+      )}
+      <span class="badge" style="align-self:flex-start; font-size:12px">Prompt · What gave you energy today?</span>
+      <input type="text" id="j-title" placeholder="Title (optional)" value="${esc(e ? e.title : "")}" />
+      <textarea id="j-text" rows="10" placeholder="Write freely… no one sees this but you." style="flex:1">${esc(e ? e.text : "")}</textarea>
     </div>`;
+  };
 
   screens.journalRead = () => {
     const e = state.journal.find((x) => x.id === state.params.id);
     if (!e) return screens.journal();
     return `
     <div class="screen">
-      ${header("", "journal")}
-      <p class="caption">${fmtDate(e.date)}</p>
-      <h1>${esc(e.title)}</h1>
-      <p>${esc(e.text)}</p>
+      ${header("A.go('journal')", entryLabel(e.date), `<button class="header-action" onclick="A.go('journalEdit', {id:${e.id}})">Edit</button>`)}
+      <div class="hrow">
+        <h1>${esc(e.title)}</h1>
+        ${e.mood != null ? `<span class="chip mini selected">${MOODS[e.mood]}</span>` : ""}
+      </div>
+      ${e.text.split(/\n\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}
     </div>`;
   };
 
   screens.paywall = () => `
     <div class="screen">
-      ${header("", "home")}
-      <div class="stack-4">
-        <h1>Nijo Plus</h1>
+      ${header(null, null, `<button class="header-action plain" onclick="A.go('home')" style="font-size:22px">✕</button>`)}
+      <div class="lockup">${smile("var(--primary)")}<span class="word">Nijo</span></div>
+      <div class="stack-4 center">
+        <h1 style="font-size:21px">Nijo Plus</h1>
         <p class="sub">More space to be heard.</p>
       </div>
-      <div class="stack-10">
+      <div class="stack-12" style="margin-top:6px">
         ${[
           "Unlimited conversations",
           "Deeper memory that remembers you",
           "Mood trends & journal insights",
           "Your data, always private",
         ]
-          .map((b) => `<div class="check-row"><span class="check-icon">✓</span><span>${b}</span></div>`)
+          .map((b) => `<div class="benefit-row"><span class="icon-chip small">${I.check}</span><span>${b}</span></div>`)
           .join("")}
       </div>
-      <div style="height:6px"></div>
-      <div class="plan-card ${state.plan === "annual" ? "selected" : ""}" onclick="A.setPlan('annual')">
-        <span class="plan-badge badge solid">Best value</span>
-        <div style="display:flex; justify-content:space-between; align-items:baseline">
-          <strong>Annual</strong><strong>₹1,499/yr</strong>
+      <div class="plan-card ${state.plan === "annual" ? "selected" : ""}" onclick="A.setPlan('annual')" style="margin-top:6px">
+        <div class="grow">
+          <div class="hrow" style="gap:8px"><h3>Annual</h3><span class="badge">Best value</span></div>
+          <p class="caption">₹1,499/yr · ₹125/mo</p>
         </div>
-        <div class="small sub">₹125/mo · <span style="color:var(--primary); font-weight:600">Save 40%</span></div>
+        <strong style="font-size:14px">Save 40%</strong>
+        <span class="check">${I.check.replace("<svg", '<svg width="18" height="18"')}</span>
       </div>
       <div class="plan-card ${state.plan === "monthly" ? "selected" : ""}" onclick="A.setPlan('monthly')">
-        <div style="display:flex; justify-content:space-between; align-items:baseline">
-          <strong>Monthly</strong><strong>₹199/mo</strong>
+        <div class="grow">
+          <h3>Monthly</h3>
+          <p class="caption">Billed every month</p>
         </div>
-        <div class="small sub">Billed every month</div>
+        <strong style="font-size:15px">₹199/mo</strong>
+        <span class="check">${I.check.replace("<svg", '<svg width="18" height="18"')}</span>
       </div>
       <div class="spacer"></div>
       <button class="btn" onclick="A.startTrial()">Start 7-day free trial</button>
@@ -478,28 +580,33 @@
 
   screens.plusWelcome = () => `
     <div class="screen centered">
-      <div class="logo">🧡</div>
+      <div class="spacer"></div>
+      <div class="lockup">${smile("var(--primary)")}<span class="word">Nijo</span></div>
       <div class="stack-4">
         <h1>Welcome to Nijo Plus</h1>
-        <p class="sub">Your 7-day free trial has started. Take all the space you need.</p>
+        <p class="sub">More room to be heard. Your 7-day trial starts today.</p>
       </div>
-      <button class="btn" onclick="A.go('home')">Continue</button>
+      <div class="stack-10" style="align-items:flex-start">
+        ${["Unlimited conversations", "Deeper memory", "Mood & journal insights"]
+          .map((b) => `<div class="benefit-row"><span class="icon-chip small">${I.check}</span><span>${b}</span></div>`)
+          .join("")}
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" style="width:100%" onclick="A.go('home')">Start</button>
     </div>`;
 
   screens.community = () => {
-    const topics = ["All", "Work", "Anxiety", "More"];
-    const visible = state.posts.filter((p) => {
-      if (state.communityTopic === "All") return true;
-      if (state.communityTopic === "More") return !["Work", "Anxiety"].includes(p.topic);
-      return p.topic === state.communityTopic;
-    });
+    const topics = ["All", "Work", "Anxiety", "Wins"];
+    const visible = state.posts.filter((p) => state.communityTopic === "All" || p.topic === state.communityTopic);
     return `
-    <div class="screen with-nav">
-      ${header("Community", "you")}
-      <p class="caption" style="margin-top:-10px">A safe, anonymous space. Be kind.</p>
+    <div class="screen">
+      <div class="stack-4">
+        <h1>Community</h1>
+        <p class="caption">Anonymous · a space to feel less alone</p>
+      </div>
       <div class="chip-row">
         ${topics
-          .map((t) => `<button class="chip tint ${state.communityTopic === t ? "selected" : ""}" onclick="A.setTopic('${t}')">${t}</button>`)
+          .map((t) => `<button class="chip ${state.communityTopic === t ? "selected" : ""}" onclick="A.setTopic('${t}')">${t}</button>`)
           .join("")}
       </div>
       <div class="stack-12">
@@ -507,34 +614,43 @@
           .map(
             (p) => `
           <div class="card tappable" onclick="A.go('postDetail', {id:${p.id}})">
-            <div class="post-meta"><span class="badge">${esc(p.topic)}</span><span>Anonymous · ${esc(p.time)}</span></div>
-            <p style="margin-top:8px">${esc(p.text)}</p>
+            <div class="post-head">
+              <span class="icon-chip small">${smile("var(--primary)")}</span>
+              <span class="caption">Anonymous · ${esc(p.time)}</span>
+              <span class="badge">${esc(p.topic)}</span>
+            </div>
+            <p style="margin-top:10px">${esc(p.text)}</p>
             <div class="post-actions">
-              <button class="post-action ${p.liked ? "liked" : ""}" onclick="event.stopPropagation(); A.likePost(${p.id})">♥ ${p.likes}</button>
-              <span class="post-action">💬 ${p.replies.length}</span>
+              <button class="post-action ${p.liked ? "liked" : ""}" onclick="event.stopPropagation(); A.likePost(${p.id})">${p.liked ? I.heartFill : I.heart} ${p.likes}</button>
+              <span class="post-action" style="cursor:default">${I.comment} ${p.replies.length}</span>
             </div>
           </div>`
           )
           .join("")}
       </div>
-      <div style="height:60px"></div>
+      <div style="height:64px"></div>
     </div>
-    <button class="fab" onclick="A.go('newPost')">+</button>
-    ${bottomNav("you")}`;
+    <button class="fab" onclick="A.go('newPost')">${I.pencil}</button>
+    ${bottomNav(null)}`;
   };
 
   screens.newPost = () => {
-    const topics = ["Work", "Anxiety", "Sleep", "Family", "More"];
+    const topics = ["Work", "Anxiety", "Relationships", "Wins", "Other"];
     return `
     <div class="screen">
-      ${header("New post", "community")}
-      <p class="sub small" style="margin-top:-10px">Posted anonymously. No name, no profile.</p>
+      ${header("A.go('community')", "New post", `<button class="header-action" onclick="A.submitPost()">Post</button>`)}
+      <div class="callout">
+        ${I.lock}
+        <span>You're posting anonymously. Nothing here is linked to your name or profile.</span>
+      </div>
+      <p class="sub small">Choose a topic</p>
       <div class="chip-row">
         ${topics
           .map((t) => `<button class="chip ${state.params.topic === t ? "selected" : ""}" onclick="A.setPostTopic('${t}')">${t}</button>`)
           .join("")}
       </div>
-      <textarea id="post-text" rows="7" placeholder="What would you like to share?">${esc(state.params.draft || "")}</textarea>
+      <textarea id="post-text" rows="6" placeholder="Share what's on your mind…">${esc(state.params.draft || "")}</textarea>
+      <p class="caption">Be kind. If you're in crisis, please reach out to a helpline or someone you trust.</p>
       <div class="spacer"></div>
       <button class="btn" onclick="A.submitPost()">Post anonymously</button>
     </div>`;
@@ -542,12 +658,14 @@
 
   screens.postShared = () => `
     <div class="screen centered">
-      <div class="logo">🕊️</div>
+      <div class="spacer"></div>
+      <div class="confirm-circle">${I.check}</div>
       <div class="stack-4">
         <h1>Shared anonymously</h1>
-        <p class="sub">Thank you for opening up. Someone out there needed to read that.</p>
+        <p class="sub">Your words are out there now — gently held by the community.</p>
       </div>
-      <button class="btn" onclick="A.go('community')">Back to community</button>
+      <div class="spacer"></div>
+      <button class="btn" style="width:100%" onclick="A.go('community')">Back to community</button>
     </div>`;
 
   screens.postDetail = () => {
@@ -555,23 +673,34 @@
     if (!p) return screens.community();
     return `
     <div class="screen">
-      ${header("Post", "community", `<button class="overflow-btn" onclick="A.go('report', {id:${p.id}})">⋯</button>`)}
+      ${header("A.go('community')", "Post", `<button class="header-action plain" onclick="A.go('report', {id:${p.id}})">•••</button>`)}
       <div class="card">
-        <div class="post-meta"><span class="badge">${esc(p.topic)}</span><span>Anonymous · ${esc(p.time)}</span></div>
-        <p style="margin-top:8px">${esc(p.text)}</p>
+        <div class="post-head">
+          <span class="icon-chip small">${smile("var(--primary)")}</span>
+          <span class="caption">Anonymous · ${esc(p.time)}</span>
+          <span class="badge">${esc(p.topic)}</span>
+        </div>
+        <p style="margin-top:10px">${esc(p.text)}</p>
         <div class="post-actions">
-          <button class="post-action ${p.liked ? "liked" : ""}" onclick="A.likePost(${p.id})">♥ ${p.likes}</button>
-          <span class="post-action">💬 ${p.replies.length}</span>
+          <button class="post-action ${p.liked ? "liked" : ""}" onclick="A.likePost(${p.id})">${p.liked ? I.heartFill : I.heart} ${p.likes}</button>
+          <span class="post-action" style="cursor:default">${I.comment} ${p.replies.length}</span>
         </div>
       </div>
-      <p class="caption">Replies</p>
+      <p class="sub small">Replies</p>
       <div class="stack-10">
-        ${p.replies.map((r) => `<div class="reply-card"><p class="small">${esc(r.text)}</p><p class="caption" style="margin-top:4px">Anonymous · ${esc(r.time)}</p></div>`).join("") || '<p class="sub small">No replies yet. Be the first kind voice.</p>'}
+        ${p.replies
+          .map(
+            (r) => `<div class="card" style="border-radius:var(--radius-row); padding:14px 16px">
+              <p class="caption">Anonymous · ${esc(r.time)}</p>
+              <p class="small" style="margin-top:2px">${esc(r.text)}</p>
+            </div>`
+          )
+          .join("") || '<p class="sub small">No replies yet. Be the first kind voice.</p>'}
       </div>
       <div class="spacer"></div>
       <div class="chat-input-row">
-        <textarea id="reply-text" rows="1" placeholder="Write a kind reply…"></textarea>
-        <button class="send-btn" onclick="A.sendReply(${p.id})">➤</button>
+        <input type="text" id="reply-text" placeholder="Reply gently…" onkeydown="if(event.key==='Enter')A.sendReply(${p.id})" />
+        <button class="send-btn" onclick="A.sendReply(${p.id})">${I.up}</button>
       </div>
     </div>`;
   };
@@ -580,124 +709,130 @@
     const reasons = ["Harmful or unsafe", "Harassment or bullying", "Spam", "Someone may be in danger", "Something else"];
     return `
     <div class="screen">
-      <div class="screen-header">
-        <button class="back-btn" onclick="A.go('postDetail', {id:${state.params.id}})">←</button>
-        <h2>Report post</h2>
+      ${header(`A.go('postDetail', {id:${state.params.id}})`)}
+      <div class="stack-4">
+        <h1>Report this post</h1>
+        <p class="sub">Help us keep this a safe, kind space. Reports are anonymous.</p>
       </div>
-      <p class="sub small" style="margin-top:-10px">Reports are anonymous. Our team reviews every one.</p>
       <div class="stack-12">
         ${reasons
           .map(
             (r, i) => `
           <div class="select-row ${state.reportReason === i ? "selected" : ""}" onclick="A.pickReason(${i})">
-            <span>${r}</span><span class="dot-check">${state.reportReason === i ? "✓" : ""}</span>
+            <span>${r}</span>
+            <span class="check">${I.check.replace("<svg", '<svg width="18" height="18"')}</span>
           </div>`
           )
           .join("")}
+      </div>
+      <div class="callout">
+        ${I.heart}
+        <span>If someone may be at risk, we'll surface support resources right away.</span>
       </div>
       <div class="spacer"></div>
       <button class="btn" ${state.reportReason === null ? "disabled" : ""} onclick="A.submitReport()">Submit report</button>
     </div>`;
   };
 
-  screens.reportDone = () => `
-    <div class="screen centered">
-      <div class="logo">🙏</div>
-      <div class="stack-4">
-        <h1>Thank you</h1>
-        <p class="sub">Your report has been received. If someone may be in immediate danger, please see the helplines below.</p>
-      </div>
-      <button class="btn secondary" onclick="A.go('gethelp', {from:'reportDone'})">Get help</button>
-      <button class="btn" onclick="A.go('community')">Back to community</button>
-    </div>`;
-
   screens.gethelp = () => {
     const back = state.params.from || "you";
     const lines = [
-      ["iCall", "Mon–Sat, 10am–8pm", "9152987821"],
-      ["Tele-MANAS", "Free · 24x7 · Govt. of India", "14416"],
-      ["Emergency", "Police / Ambulance", "112"],
+      ["KIRAN (Govt. of India)", "1800-599-0019 · 24/7", "18005990019"],
+      ["Tele-MANAS", "14416", "14416"],
+      ["iCall", "9152987821", "9152987821"],
     ];
     return `
     <div class="screen">
-      ${header("", back)}
+      ${header(`A.go('${back}')`)}
+      <span class="icon-plain" style="color:var(--primary)">${I.ring.replace("<svg", '<svg width="30" height="30"')}</span>
       <div class="stack-4">
         <h1>You're not alone</h1>
-        <p class="sub">If things feel heavy right now, please talk to a trained person. These helplines are free and confidential.</p>
+        <p class="sub">If you're in crisis or thinking about harming yourself, please reach out now. Talking to someone can help.</p>
       </div>
       <div class="stack-12">
         ${lines
           .map(
             ([name, sub, num]) => `
-          <div class="row-item" style="cursor:default">
-            <div class="icon">📞</div>
-            <div class="grow"><strong>${name}</strong><div class="small sub">${sub}</div></div>
-            <a class="btn compact" style="text-decoration:none; text-align:center" href="tel:${num}">Call</a>
+          <div class="row-item static">
+            <div class="grow"><h3 style="font-size:15px">${name}</h3><p class="caption" style="font-size:13px">${sub}</p></div>
+            <a href="tel:${num}" style="text-decoration:none"><span class="icon-chip" style="background:var(--primary); color:#fff">${I.phone}</span></a>
           </div>`
           )
           .join("")}
       </div>
-      <div class="card" style="background:var(--tint); border-color:var(--tint)">
-        <p class="small sub">Reaching out is a sign of strength, not weakness. Nijo will be here when you come back. 🧡</p>
-      </div>
+      <p class="caption">If you're in immediate danger, call your local emergency number.</p>
+      <div class="spacer"></div>
+      <button class="btn" onclick="A.go('${back}')">Back to safety</button>
     </div>`;
   };
 
-  screens.you = () => {
-    const streak = (() => {
-      let s = 0;
-      for (let i = 0; ; i++) {
-        if (state.checkins.some((c) => c.date === dateKey(daysAgo(i)))) s++;
-        else break;
-      }
-      return s;
-    })();
-    return `
-    <div class="screen with-nav">
-      <div class="stack-4">
-        <h1>Your space</h1>
-        <p class="caption">Everything about you, in one place</p>
+  screens.you = () => `
+    <div class="screen">
+      <div class="hrow">
+        ${logoSquare(48)}
+        <div class="stack-4 grow">
+          <h1>Your space</h1>
+          <p class="caption">Private to you · ${esc(state.language)}</p>
+        </div>
       </div>
-      <div class="stat-grid">
-        <div class="card stat-card"><div class="num">${streak}</div><div class="caption">day streak</div></div>
-        <div class="card stat-card"><div class="num">${state.checkins.length}</div><div class="caption">check-ins</div></div>
-        <div class="card stat-card"><div class="num">${Math.max(1, Math.ceil(state.checkins.length / 7))}</div><div class="caption">weeks</div></div>
+      <div class="card stat-card">
+        <div class="stat-cell"><div class="num">${streak()}</div><div class="caption">day streak</div></div>
+        <div class="stat-cell"><div class="num">${state.checkins.length}</div><div class="caption">check-ins</div></div>
+        <div class="stat-cell"><div class="num">${state.journal.length}</div><div class="caption">entries</div></div>
       </div>
       <div class="stack-12">
-        <button class="row-item" onclick="A.go('insights')"><div class="icon">📊</div><div class="grow">Mood insights</div><span class="chev">›</span></button>
-        <button class="row-item" onclick="A.go('journal')"><div class="icon">📖</div><div class="grow">Journal</div><span class="chev">›</span></button>
-        <button class="row-item" onclick="A.go('community')"><div class="icon">🫶</div><div class="grow">Community</div><span class="chev">›</span></button>
-        <button class="row-item" onclick="A.go('paywall')"><div class="icon">🧡</div><div class="grow">Nijo Plus ${state.plus ? '<span class="badge solid">Active</span>' : ""}</div><span class="chev">›</span></button>
-        <button class="row-item" onclick="A.go('settings')"><div class="icon">⚙️</div><div class="grow">Settings</div><span class="chev">›</span></button>
-        <button class="row-item" onclick="A.go('gethelp', {from:'you'})"><div class="icon">🆘</div><div class="grow">Help &amp; resources</div><span class="chev">›</span></button>
+        ${[
+          ["insights", I.heart, "Mood insights", "Your trends over time"],
+          ["journal", I.journal, "Journal", `${state.journal.length} entries`],
+          ["community", I.talk, "Community", "Anonymous · shared gently"],
+          ["paywall", I.star, "Nijo Plus", state.plus ? "Active membership" : "Manage membership"],
+          ["settings", I.sun, "Settings", "Account, language, privacy"],
+          ["gethelp", I.ring, "Help & resources", "Get support"],
+        ]
+          .map(
+            ([scr, icon, t, s]) => `
+          <button class="row-item" onclick="A.go('${scr}'${scr === "gethelp" ? ", {from:'you'}" : ""})">
+            <span class="icon-chip">${icon}</span>
+            <div class="grow"><h3 style="font-size:15px">${t}</h3><p class="caption" style="font-size:13px">${s}</p></div>
+            <span class="chev">›</span>
+          </button>`
+          )
+          .join("")}
       </div>
+      <div class="spacer"></div>
     </div>
     ${bottomNav("you")}`;
-  };
 
   screens.settings = () => `
     <div class="screen">
-      ${header("Settings", "you")}
+      ${header("A.go('you')")}
+      <h1>Settings</h1>
       <div class="stack-12">
-        <div class="row-item" style="cursor:default"><div class="icon">📱</div><div class="grow">Phone number<div class="small sub">+91 ${esc(state.phone || "not set")}</div></div></div>
-        <button class="row-item" onclick="A.go('language', {from:'settings'})"><div class="icon">🌐</div><div class="grow">Language<div class="small sub">${esc(state.language)}</div></div><span class="chev">›</span></button>
-        <div class="row-item" style="cursor:default">
-          <div class="icon">⏰</div><div class="grow">Daily check-in reminder<div class="small sub">A gentle nudge at 9 pm</div></div>
+        <div class="row-item static">
+          <div class="grow">Phone number</div>
+          <span class="value">+91 ${esc(state.phone || "not set")}</span><span class="chev">›</span>
+        </div>
+        <button class="row-item" onclick="A.go('language', {from:'settings'})">
+          <div class="grow">Language</div>
+          <span class="value">${esc(state.language)}</span><span class="chev">›</span>
+        </button>
+        <div class="row-item static">
+          <div class="grow">Daily check-in reminder</div>
           <label class="toggle"><input type="checkbox" ${state.reminder ? "checked" : ""} onchange="A.setReminder(this.checked)" /><span class="track"></span></label>
         </div>
-        <button class="row-item" onclick="A.exportData()"><div class="icon">📤</div><div class="grow">Export my data</div><span class="chev">›</span></button>
-        <button class="row-item" onclick="A.deleteData()"><div class="icon">🗑️</div><div class="grow">Delete my data</div><span class="chev">›</span></button>
-        <button class="row-item" onclick="A.go('about')"><div class="icon">🙂</div><div class="grow">About Nijo</div><span class="chev">›</span></button>
+        <button class="row-item" onclick="A.exportData()"><div class="grow">Export my data</div><span class="chev">›</span></button>
+        <button class="row-item" onclick="A.deleteData()"><div class="grow danger">Delete my data</div><span class="chev">›</span></button>
+        <button class="row-item" onclick="A.go('about')"><div class="grow">About Nijo</div><span class="chev">›</span></button>
       </div>
       <div class="spacer"></div>
-      <button class="btn secondary" onclick="A.signOut()">Sign out</button>
+      <button class="link danger" onclick="A.signOut()">Sign out</button>
     </div>`;
 
   screens.about = () => `
     <div class="screen centered">
-      ${header("", "settings")}
+      ${header("A.go('settings')")}
       <div class="spacer"></div>
-      <div class="logo">🙂</div>
+      <div>${logoSquare(72)}</div>
       <div class="stack-4">
         <h1>Nijo</h1>
         <p class="sub">A quiet place to be heard.</p>
@@ -707,43 +842,45 @@
     </div>`;
 
   screens.insights = () => {
-    // latest check-in per day for the last 7 days
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const key = dateKey(daysAgo(i));
-      const todays = state.checkins.filter((c) => c.date === key);
-      days.push({ key, d: daysAgo(i), offset: i, mood: todays.length ? todays[todays.length - 1].mood : null });
-    }
+    const days = checkins7();
+    const withMood = days.filter((d) => d.mood !== null);
+    const avg = withMood.length ? MOODS[Math.round(withMood.reduce((s, d) => s + d.mood, 0) / withMood.length)] : null;
     const dayName = (day) =>
       day.offset === 0 ? "Today" : day.offset === 1 ? "Yesterday" : day.d.toLocaleDateString("en-IN", { weekday: "long" });
     return `
     <div class="screen">
-      ${header("Your mood", "you")}
-      <p class="caption" style="margin-top:-10px">Last 7 days</p>
+      ${header("A.go('you')")}
+      <div class="stack-4">
+        <h1>Your mood</h1>
+        <p class="sub">A gentle look at how your week has felt.</p>
+      </div>
       <div class="card">
+        <div class="hrow">
+          <h3 class="grow">Last 7 days</h3>
+          ${avg ? `<span class="caption">${avg} average</span>` : ""}
+        </div>
         <div class="bar-chart">
           ${days
             .map(
               (day) => `
             <div class="bar-col">
-              <div class="bar ${day.mood === null ? "faded" : ""}" style="height:${day.mood === null ? 8 : ((day.mood + 1) / 5) * 100}%"></div>
+              <div class="bar ${day.offset === 0 && day.mood !== null ? "today" : ""}" style="height:${day.mood === null ? 10 : ((day.mood + 1) / 5) * 100}%"></div>
               <span class="caption">${day.d.toLocaleDateString("en-IN", { weekday: "narrow" })}</span>
             </div>`
             )
             .join("")}
         </div>
       </div>
-      <p class="caption">Recent days</p>
+      <p class="sub small">Recent check-ins</p>
       <div class="stack-10">
-        ${days
+        ${withMood
           .slice()
           .reverse()
-          .filter((day) => day.mood !== null)
           .map(
             (day) => `
-          <div class="row-item" style="cursor:default">
-            <div class="icon">${MOODS[day.mood].emoji}</div>
-            <div class="grow">${dayName(day)} · ${MOODS[day.mood].label}</div>
+          <div class="row-item static">
+            <div class="grow">${dayName(day)}</div>
+            <span class="mood-pill">${MOODS[day.mood]}</span>
           </div>`
           )
           .join("")}
@@ -763,10 +900,17 @@
     continueWelcome() {
       const v = $("#phone");
       if (state.authMode === "phone") state.phone = v.value.trim();
+      state.resendLeft = 30;
       go("verify");
+    },
+    resend() {
+      state.resendLeft = 30;
+      toast("Code sent again");
+      render();
     },
     otpNext(i) {
       const box = $("#otp" + i);
+      box.classList.toggle("filled", !!box.value);
       if (box.value && i < 5) $("#otp" + (i + 1)).focus();
     },
     setLang(l) {
@@ -807,21 +951,31 @@
         sendChat();
       }
     },
-    saveJournal() {
+    saveJournal(id) {
       const title = $("#j-title").value.trim();
       const text = $("#j-text").value.trim();
       if (!title && !text) {
         toast("Write a little something first");
         return;
       }
-      state.journal.push({
-        id: state.nextJournalId++,
-        date: new Date(),
-        title: title || "Untitled",
-        text,
-      });
-      toast("Saved to your journal");
-      go("journal");
+      if (id) {
+        const e = state.journal.find((x) => x.id === id);
+        e.title = title || "Untitled";
+        e.text = text;
+        toast("Entry updated");
+        go("journalRead", { id });
+      } else {
+        const todayCheckin = state.checkins.filter((c) => c.date === dateKey(new Date())).pop();
+        state.journal.push({
+          id: state.nextJournalId++,
+          date: new Date(),
+          title: title || "Untitled",
+          text,
+          mood: todayCheckin ? todayCheckin.mood : null,
+        });
+        toast("Saved to your journal");
+        go("journal");
+      }
     },
     setPlan(p) {
       state.plan = p;
@@ -854,7 +1008,7 @@
       }
       state.posts.unshift({
         id: state.nextPostId++,
-        topic: state.params.topic || "More",
+        topic: state.params.topic || "Other",
         text,
         likes: 0,
         liked: false,
@@ -876,8 +1030,15 @@
       render();
     },
     submitReport() {
+      const danger = state.reportReason === 3; // "Someone may be in danger"
       state.reportReason = null;
-      go("reportDone");
+      if (danger) {
+        toast("Report received. Support resources below.");
+        go("gethelp", { from: "community" });
+      } else {
+        toast("Report received. Thank you for looking out.");
+        go("community");
+      }
     },
     setReminder(v) {
       state.reminder = v;
@@ -911,12 +1072,13 @@
       state.chat = [];
       state.authMode = "phone";
       go("welcome");
-      toast("Signed out. Take care 🧡");
+      toast("Signed out. Take care");
     },
   };
   window.A = A;
 
   // ---------- render ----------
+  let resendTimer = null;
   function render() {
     const fn = screens[state.screen] || screens.home;
     $("#app").innerHTML = fn();
@@ -924,7 +1086,22 @@
       const scroll = $("#chat-scroll");
       if (scroll) scroll.scrollTop = scroll.scrollHeight;
     }
-    if (state.screen === "verify") $("#otp0")?.focus();
+    clearInterval(resendTimer);
+    if (state.screen === "verify") {
+      $("#otp0")?.focus();
+      resendTimer = setInterval(() => {
+        if (state.screen !== "verify") return clearInterval(resendTimer);
+        state.resendLeft--;
+        const el = $("#resend");
+        if (!el) return;
+        if (state.resendLeft > 0) {
+          el.textContent = "Resend code in 0:" + String(state.resendLeft).padStart(2, "0");
+        } else {
+          clearInterval(resendTimer);
+          el.innerHTML = `<button class="link" style="font-size:13px" onclick="A.resend()">Resend code</button>`;
+        }
+      }, 1000);
+    }
   }
 
   render();
