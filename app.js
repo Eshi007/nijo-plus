@@ -64,6 +64,7 @@
     pencil: stroke('<path d="M16.7 3.8a2.2 2.2 0 0 1 3.1 3.1L7.5 19.2 3.5 20.5l1.3-4z"/>'),
     up: stroke('<path d="M12 19V5.5M5.5 12 12 5.5 18.5 12" stroke-width="2.2"/>'),
     check: stroke('<path d="M5 12.5l4.5 4.5L19 7.5" stroke-width="2.4"/>'),
+    x: stroke('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke-width="2.2"/>'),
     plus: stroke('<path d="M12 5v14M5 12h14" stroke-width="2.2"/>'),
     globe: stroke('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c-2.5 2.6-3.8 5.7-3.8 9s1.3 6.4 3.8 9c2.5-2.6 3.8-5.7 3.8-9S14.5 5.6 12 3z"/>'),
   };
@@ -75,6 +76,17 @@
 
   // ---------- mood + mock data ----------
   const MOODS = ["Rough", "Low", "Okay", "Good", "Great"];
+
+  // smiley faces, one per mood: frown → big smile
+  const MOOD_MOUTHS = [
+    '<path d="M8.4 16.6c1-1.7 2.2-2.5 3.6-2.5s2.6.8 3.6 2.5"/>',
+    '<path d="M8.6 16c1-.9 2.1-1.3 3.4-1.3s2.4.4 3.4 1.3"/>',
+    '<path d="M8.8 15.4h6.4"/>',
+    '<path d="M8.6 14.6c1 .9 2.1 1.3 3.4 1.3s2.4-.4 3.4-1.3"/>',
+    '<path d="M8.2 14.2c1 1.8 2.3 2.7 3.8 2.7s2.8-.9 3.8-2.7"/>',
+  ];
+  const moodFace = (i) =>
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8.6 9.7v.01M15.4 9.7v.01" stroke-width="2.5"/>${MOOD_MOUTHS[i]}</svg>`;
 
   function seedCheckins() {
     // one per day for the last 7 days (last = today)
@@ -290,7 +302,7 @@
       <div class="spacer"></div>
       <div>${logoSquare(72)}</div>
       <div style="height:4px"></div>
-      <h1>A quiet place to be heard</h1>
+      <h1>Whatever's on your mind,<br>Nijo is here</h1>
       <p class="sub">Talk it through, reflect, and feel a little lighter — in the language you think in.</p>
       <div class="spacer"></div>
       ${
@@ -386,14 +398,65 @@
       <span class="icon-plain" style="color:var(--primary)">${I.heart.replace("<svg", '<svg width="30" height="30"')}</span>
       <div class="stack-4">
         <h1>A companion, not a clinic</h1>
-        <p class="sub">Nijo is here to listen and help you reflect. It isn't a therapist, doctor, or emergency service, and it can't replace professional care.</p>
+        <p class="sub">Here's what that means, in plain words:</p>
+      </div>
+      <div class="card stack-12" style="padding:20px">
+        <p class="caption" style="font-weight:600; letter-spacing:0.04em; text-transform:uppercase">What Nijo is</p>
+        ${[
+          [I.check, "A companion that listens", "A space to talk, vent, and reflect — without judgement."],
+          [I.heart, "Support for everyday feelings", "Stress, low days, overthinking, and the small wins too."],
+        ]
+          .map(
+            ([icon, t, s]) => `
+          <div class="hrow" style="align-items:flex-start">
+            <span class="icon-plain" style="margin-top:3px; color:var(--primary)">${icon}</span>
+            <div class="grow"><h3 style="font-weight:600; font-size:15px">${t}</h3><p class="small sub">${s}</p></div>
+          </div>`
+          )
+          .join("")}
+      </div>
+      <div class="card stack-12" style="padding:20px">
+        <p class="caption" style="font-weight:600; letter-spacing:0.04em; text-transform:uppercase">What Nijo is not</p>
+        ${[
+          [I.x, "Not a therapist or doctor", "Nijo can't diagnose, treat, or give medical advice."],
+          [I.x, "Not an emergency service", "It can't replace professional care in a crisis."],
+        ]
+          .map(
+            ([icon, t, s]) => `
+          <div class="hrow" style="align-items:flex-start">
+            <span class="icon-plain" style="margin-top:3px">${icon}</span>
+            <div class="grow"><h3 style="font-weight:600; font-size:15px">${t}</h3><p class="small sub">${s}</p></div>
+          </div>`
+          )
+          .join("")}
       </div>
       <div class="callout tappable" onclick="A.go('gethelp', {from:'disclaimer'})">
         ${I.info}
         <span>If you're in crisis or thinking about harming yourself, please contact a local helpline or someone you trust right now.</span>
       </div>
       <div class="spacer"></div>
-      <button class="btn" onclick="A.go('home')">I understand</button>
+      <button class="btn" onclick="A.go('firstCheckin')">I understand</button>
+    </div>`;
+
+  screens.firstCheckin = () => `
+    <div class="screen">
+      ${header("A.go('disclaimer')")}
+      <div class="stack-4">
+        <h1>One last thing — how are you feeling right now?</h1>
+        <p class="sub">This helps Nijo meet you where you are. You can check in anytime from home.</p>
+      </div>
+      <div class="mood-pick-row">
+        ${MOODS.map(
+          (m, i) => `
+        <button class="mood-pick ${state.checkinMood === i ? "selected" : ""}" onclick="A.pickFirstMood(${i})">
+          <span class="face">${moodFace(i)}</span>
+          <span>${m}</span>
+        </button>`
+        ).join("")}
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" ${state.checkinMood === null ? "disabled" : ""} onclick="A.finishFirstCheckin()">Continue</button>
+      <button class="link" onclick="A.skipFirstCheckin()">Skip for now</button>
     </div>`;
 
   screens.home = () => {
@@ -410,7 +473,7 @@
       <div class="card">
         <h3>How are you feeling right now?</h3>
         <div class="mood-dots">
-          ${MOODS.map((m, i) => `<button class="mood-dot ${todayCheckin && todayCheckin.mood === i ? "active" : ""}" title="${m}" onclick="A.startCheckin(${i})"></button>`).join("")}
+          ${MOODS.map((m, i) => `<button class="mood-dot ${todayCheckin && todayCheckin.mood === i ? "active" : ""}" title="${m}" onclick="A.startCheckin(${i})">${moodFace(i)}</button>`).join("")}
         </div>
       </div>
       ${[
@@ -835,7 +898,7 @@
       <div>${logoSquare(72)}</div>
       <div class="stack-4">
         <h1>Nijo</h1>
-        <p class="sub">A quiet place to be heard.</p>
+        <p class="sub">Here for whatever's on your mind.</p>
         <p class="caption">Version 0.1 (prototype) · Made with care in India</p>
       </div>
       <div class="spacer"></div>
@@ -926,6 +989,19 @@
     setConsent(v) {
       state.consent = v;
       render();
+    },
+    pickFirstMood(i) {
+      state.checkinMood = i;
+      render();
+    },
+    finishFirstCheckin() {
+      state.checkins.push({ date: dateKey(new Date()), mood: state.checkinMood, note: "" });
+      state.checkinMood = null;
+      go("home");
+    },
+    skipFirstCheckin() {
+      state.checkinMood = null;
+      go("home");
     },
     startCheckin(mood) {
       state.checkinMood = mood ?? null;

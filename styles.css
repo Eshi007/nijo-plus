@@ -250,17 +250,41 @@ textarea { resize: none; line-height: 1.6; }
 .nav-item svg { width: 22px; height: 22px; }
 
 /* mood dots (home) */
-.mood-dots { display: flex; gap: 18px; margin-top: 14px; }
+.mood-dots { display: flex; gap: 14px; margin-top: 14px; }
 .mood-dot {
-  width: 30px; height: 30px;
+  width: 38px; height: 38px;
   border-radius: 50%;
   border: none;
   background: var(--tint);
+  color: var(--primary);
   cursor: pointer;
   transition: transform 0.1s ease;
+  display: flex; align-items: center; justify-content: center;
 }
-.mood-dot.active { background: var(--primary); }
+.mood-dot svg { width: 26px; height: 26px; }
+.mood-dot.active { background: var(--primary); color: #fff; }
 .mood-dot:active { transform: scale(0.9); }
+
+/* first check-in (onboarding) */
+.mood-pick-row { display: flex; justify-content: space-between; margin-top: 10px; }
+.mood-pick {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: none; border: none; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 500;
+  color: var(--text-2);
+}
+.mood-pick .face {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: var(--tint);
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.1s ease;
+}
+.mood-pick .face svg { width: 34px; height: 34px; }
+.mood-pick:active .face { transform: scale(0.92); }
+.mood-pick.selected { color: var(--text); font-weight: 600; }
+.mood-pick.selected .face { background: var(--primary); color: #fff; }
 
 .chip-row { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip {
