@@ -65,25 +65,16 @@
     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths}${extra || ""}</svg>`;
   const I = {
     back: stroke('<path d="M15 5l-7 7 7 7" stroke-width="2.2"/>'),
-    heart: stroke('<path d="M12 20.5s-7.5-4.7-9.5-9.3C1 7.5 3.5 4.5 6.8 4.5c2.2 0 3.9 1.2 5.2 3 1.3-1.8 3-3 5.2-3 3.3 0 5.8 3 4.3 6.7-2 4.6-9.5 9.3-9.5 9.3z"/>'),
-    ring: stroke('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.8"/><path d="M5.7 5.7l3.6 3.6M14.7 14.7l3.6 3.6M18.3 5.7l-3.6 3.6M9.3 14.7l-3.6 3.6"/>'),
     phone: stroke('<path d="M21.5 16.9v3a1.8 1.8 0 0 1-2 1.8 18.8 18.8 0 0 1-8.2-2.9 18.4 18.4 0 0 1-5.7-5.7A18.8 18.8 0 0 1 2.7 4.9a1.8 1.8 0 0 1 1.8-2h3a1.8 1.8 0 0 1 1.8 1.5c.1.9.3 1.8.6 2.7a1.8 1.8 0 0 1-.4 1.9L8.2 10.3a14.7 14.7 0 0 0 5.5 5.5l1.3-1.3a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.5 2.7.6a1.8 1.8 0 0 1 1.9 2.2z"/>'),
-    lock: stroke('<rect x="5" y="11" width="14" height="9.5" rx="2.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>'),
-    trash: stroke('<path d="M4 6.5h16M9.5 6.5V4.8A1.3 1.3 0 0 1 10.8 3.5h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7M6.5 6.5l1 13a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-13"/>'),
-    memory: stroke('<rect x="4.5" y="3.5" width="15" height="17" rx="2.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/>'),
     info: stroke('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/>'),
     up: stroke('<path d="M12 19V5.5M5.5 12 12 5.5 18.5 12" stroke-width="2.2"/>'),
     check: stroke('<path d="M5 12.5l4.5 4.5L19 7.5" stroke-width="2.4"/>'),
-    x: stroke('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke-width="2.2"/>'),
     plus: stroke('<path d="M12 5v14M5 12h14" stroke-width="2.2"/>'),
     gear: stroke('<circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.7 7.7 0 0 0 0-3l1.7-1.3-1.8-3.1-2 .8a7.7 7.7 0 0 0-2.6-1.5L14.4 3h-3.6l-.3 2.4a7.7 7.7 0 0 0-2.6 1.5l-2-.8L4 9.2l1.7 1.3a7.7 7.7 0 0 0 0 3L4 14.8l1.8 3.1 2-.8a7.7 7.7 0 0 0 2.6 1.5l.3 2.4h3.6l.3-2.4a7.7 7.7 0 0 0 2.6-1.5l2 .8 1.8-3.1z"/>'),
-    download: stroke('<path d="M12 3.5v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 17.5v2a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-2"/>'),
   };
   // brand smile: arc + dot
   const smile = (color) =>
     `<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="2" fill="${color}"/><path d="M6 12c1.7 2.8 3.9 4.2 6 4.2s4.3-1.4 6-4.2" stroke="${color}" stroke-width="2.6" stroke-linecap="round"/></svg>`;
-  const logoSquare = (size) =>
-    `<span style="display:inline-flex; width:${size}px; height:${size}px; background:var(--primary); border-radius:${Math.round(size * 0.3)}px; align-items:center; justify-content:center"><span style="width:${Math.round(size * 0.72)}px; height:${Math.round(size * 0.72)}px; display:flex">${smile("#fff")}</span></span>`;
 
   // mood faces, one per score: frown → big smile
   const MOODS = ["Rough", "Low", "Okay", "Good", "Great"];
@@ -98,10 +89,12 @@
     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8.6 9.7v.01M15.4 9.7v.01" stroke-width="2.5"/>${MOOD_MOUTHS[i]}</svg>`;
 
   // ---------- language ----------
+  // Each option in its own script, never transliterated — someone should be
+  // able to find their language without reading English first.
   const LANGUAGES = [
-    { value: "Hinglish", label: "Hinglish", common: true },
-    { value: "Hindi", label: "हिंदी · Hindi" },
-    { value: "Malayalam", label: "മലയാളം · Malayalam" },
+    { value: "Hinglish", label: "Hinglish" },
+    { value: "Hindi", label: "हिन्दी" },
+    { value: "Malayalam", label: "മലയാളം" },
     { value: "English", label: "English" },
   ];
 
@@ -161,8 +154,11 @@
   const ui = {
     screen: "splash",
     params: {},
-    pendingLanguage: "Hinglish", // chosen before auth exists; written to users after
+    pendingLanguage: null, // chosen before auth exists; written to users after
     phoneDraft: "",
+    phoneError: "",
+    otpDigits: ["", "", "", "", "", ""],
+    otpError: "",
     termsAccepted: false,
     dataConsent: false,
     firstMood: null,
@@ -173,6 +169,7 @@
     limitHit: false,
     resendLeft: 30,
     deleteConfirm: "",
+    exporting: false,
     fallbackIdx: 0,
   };
 
@@ -206,7 +203,7 @@
   const messagesIn = (threadId) => db.messages.filter((m) => m.thread_id === threadId);
   const activeThread = () => db.threads.find((t) => t.id === ui.activeThreadId) || null;
   const companion = () => (db.user && db.user.companion_name) || "Nijo";
-  const language = () => (db.user && db.user.language) || ui.pendingLanguage;
+  const language = () => (db.user && db.user.language) || ui.pendingLanguage || "Hinglish";
 
   function threadPreview(t) {
     if (t.title) return t.title;
@@ -414,16 +411,12 @@
   // ---------- screens ----------
   const screens = {};
 
+  // The wordmark, centred, on cream. Nothing else — no tagline, no spinner. If
+  // the session check takes long enough to notice, that's a performance problem,
+  // not something to paper over with animation.
   screens.splash = () => `
     <div class="screen centered">
-      <div class="spacer"></div>
-      <div>${logoSquare(76)}</div>
-      <div class="stack-4">
-        <h1>NiJo Plus</h1>
-        <p class="sub">Here for whatever's on your mind.</p>
-      </div>
-      <div class="spacer"></div>
-      <p class="caption">Checking your session…</p>
+      <p class="wordmark">NiJo<span class="plus"> Plus</span></p>
     </div>`;
 
   // Language before terms: DPDP requires the notice to be understandable to the
@@ -434,21 +427,18 @@
     return `
     <div class="screen">
       ${header(fromSettings ? "A.go('settings')" : null)}
-      <div class="stack-4">
-        <h1>Which language feels like home?</h1>
-        <p class="sub">Nijo will talk to you in this. You can change it anytime.</p>
-      </div>
+      <h1>Which language feels like home?</h1>
       <div class="stack-12">
         ${LANGUAGES.map(
           (l) => `
           <div class="select-row ${selected === l.value ? "selected" : ""}" onclick="A.setLang('${l.value}')">
-            <span class="hrow" style="gap:10px">${l.label} ${l.common ? '<span class="badge">Most used</span>' : ""}</span>
-            <span class="check">${I.check.replace("<svg", '<svg width="18" height="18"')}</span>
+            <span>${l.label}</span>
+            <span class="check">${I.check.replace("<svg", '<svg width="20" height="20"')}</span>
           </div>`
         ).join("")}
       </div>
       <div class="spacer"></div>
-      <button class="btn" onclick="A.langContinue()">Continue</button>
+      <button class="btn" ${selected ? "" : "disabled"} onclick="A.langContinue()">Continue</button>
     </div>`;
   };
 
@@ -457,15 +447,20 @@
       ${header("A.go('language')")}
       <div class="stack-4">
         <h1>What's your number?</h1>
-        <p class="sub">We'll send a 6-digit code. Your number is only used to sign you in.</p>
+        <p class="sub">We'll text you a six-digit code to sign you in.</p>
       </div>
-      <div class="phone-input">
-        <span>+91</span>
-        <input id="phone" type="tel" inputmode="numeric" placeholder="Phone number" value="${esc(ui.phoneDraft)}" />
+      <div class="stack-8">
+        <div class="phone-input ${ui.phoneError ? "errored" : ""}" id="phone-wrap">
+          <span>+91</span>
+          <input id="phone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number"
+                 value="${esc(ui.phoneDraft)}" oninput="A.phoneInput(this)" onblur="A.phoneBlur()" />
+        </div>
+        ${ui.phoneError ? `<p class="field-error" id="phone-error">${esc(ui.phoneError)}</p>` : ""}
       </div>
       <div class="spacer"></div>
-      <button class="btn" onclick="A.submitPhone()">Send code</button>
-      <p class="caption center">Prototype — any number works and no SMS is sent.</p>
+      <button class="btn" id="phone-continue" ${ui.phoneDraft.length === 10 ? "" : "disabled"} onclick="A.submitPhone()">Continue</button>
+      <p class="caption center">Only used to sign you in. It is never shown to anyone else, and never posted anywhere.</p>
+      <p class="caption center">Prototype — any ten digits work and no SMS is sent.</p>
     </div>`;
 
   screens.otp = () => `
@@ -473,65 +468,50 @@
       ${header("A.go('phone')")}
       <div class="stack-4">
         <h1>Enter the code</h1>
-        <p class="sub">Sent to +91 ${esc(ui.phoneDraft || "your number")}.</p>
+        <p class="sub">Sent to +91 ${esc(ui.phoneDraft || "your number")} · <button class="link-inline" onclick="A.editNumber()">change</button></p>
       </div>
-      <div class="otp-row">
-        ${[0, 1, 2, 3, 4, 5].map((i) => `<input class="otp-box" id="otp${i}" maxlength="1" inputmode="numeric" oninput="A.otpNext(${i})" />`).join("")}
+      <div class="stack-8">
+        <div class="otp-row ${ui.otpError ? "errored" : ""}">
+          ${[0, 1, 2, 3, 4, 5]
+            .map(
+              (i) =>
+                `<input class="otp-box ${ui.otpDigits[i] ? "filled" : ""}" id="otp${i}" maxlength="1" inputmode="numeric"
+                        value="${esc(ui.otpDigits[i])}" oninput="A.otpInput(${i})" onkeydown="A.otpKey(event, ${i})" />`
+            )
+            .join("")}
+        </div>
+        ${ui.otpError ? `<p class="field-error">${esc(ui.otpError)}</p>` : ""}
       </div>
       <p class="caption" id="resend"></p>
       <div class="spacer"></div>
       <button class="btn" onclick="A.verifyOtp()">Verify</button>
     </div>`;
 
-  // Terms and data-processing consent are separately affirmable — a single
-  // blanket tick is the pattern the DPDP Act was written against.
+  // Terms and data consent are separately affirmable — a single blanket tick is
+  // the pattern the DPDP Act was written against. Plain summary first, both
+  // boxes above the fold, then the mood question.
   screens.consent = () => `
     <div class="screen">
-      <div class="stack-4">
-        <h1>Before we start</h1>
-        <p class="sub">Two things to agree to, and one question. The agreements are separate — tick only what you mean.</p>
-      </div>
-
-      <div class="card stack-12" style="padding:20px">
-        <p class="eyebrow">What Nijo is, and isn't</p>
-        <div class="hrow" style="align-items:flex-start">
-          <span class="icon-plain" style="margin-top:3px; color:var(--primary)">${I.heart}</span>
-          <div class="grow"><h3 class="row-title">A companion that listens</h3><p class="small sub">Somewhere to talk, vent and think out loud, without being judged.</p></div>
-        </div>
-        <div class="hrow" style="align-items:flex-start">
-          <span class="icon-plain" style="margin-top:3px">${I.x}</span>
-          <div class="grow"><h3 class="row-title">Not a therapist, doctor or emergency service</h3><p class="small sub">Nijo can't diagnose or treat, and can't replace professional care.</p></div>
-        </div>
-      </div>
-
-      <div class="card stack-12" style="padding:20px">
-        <p class="eyebrow">How your data is handled</p>
-        <div class="hrow" style="align-items:flex-start">
-          <span class="icon-plain" style="margin-top:3px">${I.lock}</span>
-          <div class="grow"><h3 class="row-title">Private to you</h3><p class="small sub">Your conversations are yours. They are never sold or used for ads.</p></div>
-        </div>
-        <div class="hrow" style="align-items:flex-start">
-          <span class="icon-plain" style="margin-top:3px">${I.memory}</span>
-          <div class="grow"><h3 class="row-title">Stored so Nijo can remember you</h3><p class="small sub">Your messages and a short summary, kept to give you continuity.</p></div>
-        </div>
-        <div class="hrow" style="align-items:flex-start">
-          <span class="icon-plain" style="margin-top:3px">${I.trash}</span>
-          <div class="grow"><h3 class="row-title">Yours to export or erase</h3><p class="small sub">Take everything with you, or delete all of it, from Settings.</p></div>
-        </div>
-      </div>
+      <h1>Before we start</h1>
+      <p class="sub">Nijo is someone to talk to, not a therapist or a doctor. What you write is stored so it can remember your conversations. It is never sold, never used for ads, and never shown to anyone else. You can take all of it with you, or delete all of it, whenever you want.</p>
 
       <label class="checkbox-row">
         <input type="checkbox" id="c-terms" ${ui.termsAccepted ? "checked" : ""} onchange="A.setTerms(this.checked)" />
-        <span class="small">I accept the Terms of Use (v${TERMS_VERSION}).</span>
+        <span class="grow small">I accept the terms of use.
+          <button class="link-inline" onclick="event.preventDefault(); A.showFullText('terms')">Read them</button>
+        </span>
       </label>
       <label class="checkbox-row">
         <input type="checkbox" id="c-data" ${ui.dataConsent ? "checked" : ""} onchange="A.setDataConsent(this.checked)" />
-        <span class="small">I consent to my messages and mood check-ins being processed to run Nijo.</span>
+        <span class="grow small">I agree to my conversations being stored so Nijo can remember them.
+          <button class="link-inline" onclick="event.preventDefault(); A.showFullText('data')">What's stored</button>
+        </span>
       </label>
 
-      <div class="card" style="padding:18px 20px">
-        <h3 class="row-title">How are you feeling right now?</h3>
-        <p class="caption">Optional. It just helps Nijo meet you where you are.</p>
+      <hr class="divider" />
+
+      <div class="stack-12">
+        <h3>How are you doing right now?</h3>
         <div class="mood-pick-row">
           ${MOODS.map(
             (m, i) => `
@@ -542,23 +522,27 @@
         </div>
       </div>
 
-      <button class="btn" ${ui.termsAccepted && ui.dataConsent ? "" : "disabled"} onclick="A.acceptConsent()">Agree &amp; continue</button>
+      <div class="spacer"></div>
+      <button class="btn" ${ui.termsAccepted && ui.dataConsent && ui.firstMood !== null ? "" : "disabled"} onclick="A.acceptConsent()">Continue</button>
     </div>`;
 
+  // The moment the product becomes personal. Pre-filled, so tapping straight
+  // through is as intended a path as naming it yourself. Companion green.
   screens.nameCompanion = () => {
     const fromSettings = ui.params.from === "settings";
     return `
     <div class="screen">
       ${header(fromSettings ? "A.go('settings')" : null)}
       <div class="spacer"></div>
-      <div class="center">${logoSquare(64)}</div>
-      <div class="stack-4 center">
-        <h1>${fromSettings ? "Rename your companion" : "What should we call your companion?"}</h1>
-        <p class="sub">Nijo is the default. Plenty of people pick a name of their own.</p>
+      <div class="companion-mark">${smile("currentColor")}</div>
+      <div class="stack-8 center">
+        <h1>${fromSettings ? "What should we call them?" : "Every companion needs a name"}</h1>
+        <p class="sub">Nijo is a good one. So is anything else you'd rather say.</p>
       </div>
-      <input type="text" id="companion-name" maxlength="24" value="${esc(fromSettings ? companion() : "Nijo")}" />
+      <input type="text" id="companion-name" class="name-field" maxlength="24"
+             value="${esc(fromSettings ? companion() : "Nijo")}" />
       <div class="spacer"></div>
-      <button class="btn" onclick="A.saveCompanionName()">${fromSettings ? "Save" : "Start talking"}</button>
+      <button class="btn companion" onclick="A.saveCompanionName()">${fromSettings ? "Save" : "Start talking"}</button>
     </div>`;
   };
 
@@ -570,8 +554,8 @@
     <div class="screen">
       <div class="hrow">
         <div class="stack-4 grow">
-          <h1>Your problems</h1>
-          <p class="caption">One thread each. ${esc(companion())} keeps them apart.</p>
+          <h1>${esc(companion())}</h1>
+          <p class="caption">One thread for each thing on your mind.</p>
         </div>
         <button class="icon-btn" onclick="A.go('settings')" aria-label="Settings">${I.gear}</button>
       </div>
@@ -603,13 +587,19 @@
     <div class="screen" style="gap:8px">
       ${header(
         "A.go('threads')",
-        `${esc(companion())}<br><span style="font-size:12px">here for you</span>`,
-        flagged ? `<button class="header-action small-action" onclick="A.openCareCard()">Get help</button>` : ""
+        esc(thread.title || "Untitled"),
+        flagged ? `<button class="header-action" onclick="A.openCareCard()">Get help</button>` : ""
       )}
       <div class="chat-scroll" id="chat-scroll">
-        <div class="bubble nijo">${esc(OPENERS[language()] || OPENERS.English)}</div>
+        ${
+          msgs.length
+            ? ""
+            : /* an invitation, not an instruction — and no prompt chips, which
+                 teach people to pick from a menu instead of saying the true thing */
+              `<p class="chat-opener">${esc(OPENERS[language()] || OPENERS.English)}</p>`
+        }
         ${msgs.map((m) => `<div class="bubble ${m.role === "user" ? "user" : "nijo"}">${esc(m.content)}</div>`).join("")}
-        ${ui.typing ? '<div class="bubble nijo"><span class="typing"><span></span><span></span><span></span></span></div>' : ""}
+        ${ui.typing ? '<div class="typing"><span></span><span></span><span></span></div>' : ""}
         ${ui.streaming !== null ? `<div class="bubble nijo" id="stream-bubble">${esc(ui.streaming)}</div>` : ""}
       </div>
       ${
@@ -618,8 +608,9 @@
           : ""
       }
       <div class="chat-input-row">
-        <textarea id="chat-text" rows="1" placeholder="Message ${esc(companion())}…" onkeydown="A.chatKey(event)"></textarea>
-        <button class="send-btn" onclick="A.sendMessage()" ${ui.typing ? "disabled" : ""}>${I.up}</button>
+        <textarea id="chat-text" rows="1" placeholder="Message ${esc(companion())}…"
+                  oninput="A.chatInput(this)" onkeydown="A.chatKey(event)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="A.sendMessage()" disabled>${I.up}</button>
       </div>
     </div>`;
   };
@@ -628,10 +619,6 @@
     <div class="screen">
       ${header("A.go('threads')", "Settings")}
       <div class="stack-12" style="margin-top:6px">
-        <div class="row-item static">
-          <div class="grow">Phone number</div>
-          <span class="value">+91 ${esc(db.user ? db.user.phone : "")}</span>
-        </div>
         <button class="row-item" onclick="A.go('language', {from:'settings'})">
           <div class="grow">Language</div>
           <span class="value">${esc(language())}</span><span class="chev">›</span>
@@ -641,68 +628,66 @@
           <span class="value">${esc(companion())}</span><span class="chev">›</span>
         </button>
         <button class="row-item" onclick="A.openCareCard()">
-          <div class="grow">Helplines</div>
-          <span class="chev">›</span>
+          <div class="grow">Someone to talk to</div>
+          <span class="value">Helplines</span><span class="chev">›</span>
         </button>
-        <button class="row-item" onclick="A.exportData()">
-          <span class="icon-plain">${I.download}</span>
-          <div class="grow">Export my data</div><span class="chev">›</span>
-        </button>
-        <button class="row-item" onclick="A.go('deleteAccount')">
-          <span class="icon-plain danger">${I.trash}</span>
-          <div class="grow danger">Delete my account</div><span class="chev">›</span>
+        <button class="row-item" ${ui.exporting ? "disabled" : ""} onclick="A.exportData()">
+          <div class="grow">
+            <h3 class="row-title">Export my data</h3>
+            <p class="caption">${ui.exporting ? "Preparing your file…" : "Every thread, every message, what " + esc(companion()) + " remembers, and your mood check-ins, as one JSON file."}</p>
+          </div>
+          <span class="chev">${ui.exporting ? "…" : "›"}</span>
         </button>
       </div>
       <div class="spacer"></div>
-      <button class="link" onclick="A.loadSamples()">Load sample threads (prototype only)</button>
-      <button class="link danger" onclick="A.signOut()">Sign out</button>
-      <p class="caption center">NiJo Plus · prototype 0.2 · Terms v${TERMS_VERSION}</p>
+      <button class="row-item" onclick="A.go('deleteAccount')">
+        <div class="grow danger">Delete my account</div><span class="chev">›</span>
+      </button>
+      <div class="stack-8 center" style="margin-top:4px">
+        <button class="link quiet" onclick="A.loadSamples()">Load sample threads (prototype only)</button>
+        <button class="link quiet" onclick="A.signOut()">Sign out</button>
+        <p class="caption">NiJo Plus · prototype 0.2 · terms v${TERMS_VERSION}</p>
+      </div>
     </div>`;
 
   screens.deleteAccount = () => `
     <div class="screen">
       ${header("A.go('settings')")}
-      <span class="icon-plain danger">${I.trash.replace("<svg", '<svg width="30" height="30"')}</span>
-      <div class="stack-4">
-        <h1>Delete your account</h1>
-        <p class="sub">This erases every thread, every message, what ${esc(companion())} remembers about you, your mood check-ins, and the account itself. It is permanent and it is immediate.</p>
-      </div>
-      <div class="callout">
-        ${I.download}
-        <span>If you might want your words later, export them first — this can't be undone.</span>
-      </div>
-      <p class="small sub">Type <strong>DELETE</strong> to confirm.</p>
-      <input type="text" id="del-confirm" placeholder="DELETE" value="${esc(ui.deleteConfirm)}" oninput="A.setDeleteConfirm(this.value)" />
+      <h1>Delete your account</h1>
+      <p class="sub">This removes every conversation, everything ${esc(companion())} remembers about you, your mood check-ins, and the account itself. It happens immediately and it cannot be undone.</p>
+      <p class="sub small">Type <strong>delete</strong> below to confirm.</p>
+      <input type="text" id="del-confirm" placeholder="delete" value="${esc(ui.deleteConfirm)}" oninput="A.setDeleteConfirm(this.value)" />
       <div class="spacer"></div>
-      <button class="btn danger-btn" ${ui.deleteConfirm.trim().toUpperCase() === "DELETE" ? "" : "disabled"} onclick="A.deleteAccount()">Delete everything</button>
-      <button class="link" onclick="A.go('settings')">Keep my account</button>
+      <button class="btn danger-btn" ${ui.deleteConfirm.trim().toLowerCase() === "delete" ? "" : "disabled"} onclick="A.deleteAccount()">Delete my account</button>
+      <button class="link quiet" onclick="A.go('settings')">Cancel</button>
     </div>`;
 
   // The care card is an overlay, never a replacement — the conversation stays
   // visible underneath it.
   function careCard() {
+    // Three India-specific resources. No warning triangles, no sirens, no
+    // emergency iconography, and the word "crisis" appears nowhere — alarm is
+    // the wrong register for someone who has just been honest.
     const lines = [
-      ["Tele-MANAS", "14416 · free, 24×7, 20 languages", "14416"],
-      ["KIRAN (Govt. of India)", "1800-599-0019 · free, 24×7", "18005990019"],
-      ["iCall (TISS)", "9152987821 · Mon–Sat, 10am–8pm", "9152987821"],
-      ["Emergency services", "112", "112"],
+      ["Tele-MANAS", "Government mental-health line · free, 24×7, 20 languages", "14416", "14416"],
+      ["KIRAN", "Government helpline · free, 24×7", "1800-599-0019", "18005990019"],
+      ["iCall", "Counsellors at TISS · Mon–Sat, 10am–8pm", "9152987821", "9152987821"],
     ];
     return `
     <div class="overlay" onclick="A.closeCareCard(event)">
       <div class="care-card" onclick="event.stopPropagation()">
         <div class="care-grip"></div>
-        <span class="icon-plain" style="color:var(--primary)">${I.ring.replace("<svg", '<svg width="28" height="28"')}</span>
-        <div class="stack-4">
+        <div class="stack-8">
           <h2>I'm still here</h2>
-          <p class="sub small">What you said matters, and I don't want you sitting with it alone. These are people who pick up, at any hour.</p>
+          <p class="sub small">What you just said matters, and I don't want you holding it on your own. These are people who pick up, at any hour.</p>
         </div>
         <div class="stack-10">
           ${lines
             .map(
-              ([name, sub, num]) => `
+              ([name, what, num, tel]) => `
             <div class="row-item static">
-              <div class="grow"><h3 class="row-title">${name}</h3><p class="caption">${sub}</p></div>
-              <a href="tel:${num}" class="call-btn" aria-label="Call ${name}">${I.phone}</a>
+              <div class="grow"><h3 class="row-title">${name}</h3><p class="caption">${what}</p></div>
+              <a href="tel:${tel}" class="call-btn" aria-label="Call ${name} on ${num}">${I.phone}</a>
             </div>`
             )
             .join("")}
@@ -728,22 +713,55 @@
       if (ui.params.from === "settings") {
         toast(companion() + " will reply in " + language());
         go("settings");
-      } else go("phone");
+      } else if (ui.pendingLanguage) go("phone");
+    },
+    // Typed straight into the DOM rather than through render(), so the field
+    // keeps focus while the button gate updates.
+    phoneInput(el) {
+      const digits = el.value.replace(/\D/g, "").slice(0, 10);
+      if (el.value !== digits) el.value = digits;
+      ui.phoneDraft = digits;
+      $("#phone-continue").disabled = digits.length !== 10;
+      if (ui.phoneError && digits.length === 10) {
+        ui.phoneError = "";
+        $("#phone-error")?.remove();
+        $("#phone-wrap").classList.remove("errored");
+      }
+    },
+    phoneBlur() {
+      if (ui.phoneDraft.length === 0 || ui.phoneDraft.length === 10) return;
+      ui.phoneError = `That's ${ui.phoneDraft.length} digit${ui.phoneDraft.length === 1 ? "" : "s"} — Indian mobile numbers have 10. Add the rest.`;
+      render();
+      $("#phone").focus();
     },
     submitPhone() {
-      const v = $("#phone").value.replace(/\D/g, "");
-      if (v.length < 6) {
-        toast("Enter a phone number");
-        return;
-      }
-      ui.phoneDraft = v;
+      if (ui.phoneDraft.length !== 10) return;
+      ui.phoneError = "";
+      ui.otpDigits = ["", "", "", "", "", ""];
+      ui.otpError = "";
       ui.resendLeft = 30;
       go("otp");
     },
-    otpNext(i) {
+    editNumber() {
+      go("phone");
+      $("#phone")?.focus();
+    },
+    otpInput(i) {
       const box = $("#otp" + i);
+      box.value = box.value.replace(/\D/g, "");
+      ui.otpDigits[i] = box.value;
       box.classList.toggle("filled", !!box.value);
       if (box.value && i < 5) $("#otp" + (i + 1)).focus();
+    },
+    otpKey(e, i) {
+      if (e.key === "Backspace" && !e.target.value && i > 0) {
+        e.preventDefault();
+        const prev = $("#otp" + (i - 1));
+        prev.value = "";
+        ui.otpDigits[i - 1] = "";
+        prev.classList.remove("filled");
+        prev.focus();
+      }
     },
     resend() {
       ui.resendLeft = 30;
@@ -753,6 +771,14 @@
     // Verify creates the session. The language picked before auth is written to
     // the users row now that there's a user to write it to.
     verifyOtp() {
+      // An error must never clear what they typed — re-entering five correct
+      // digits because one was wrong is the most irritating thing here.
+      if (ui.otpDigits.some((d) => !d)) {
+        ui.otpError = "That's not all six digits yet. Fill the empty boxes and try again.";
+        render();
+        return;
+      }
+      ui.otpError = "";
       db.user = {
         id: uid("usr"),
         phone: ui.phoneDraft,
@@ -775,8 +801,11 @@
       render();
     },
     pickFirstMood(i) {
-      ui.firstMood = ui.firstMood === i ? null : i;
+      ui.firstMood = i;
       render();
+    },
+    showFullText(which) {
+      toast(which === "terms" ? "The full terms open here in the real app." : "The full data notice opens here in the real app.");
     },
     // Consent writes before mood writes — mood is personal data, and recording
     // it before consent is logged inverts what consent is for.
@@ -818,6 +847,12 @@
       createThread();
       go("chat");
     },
+    // Multiline input that grows with content; send stays inactive while empty.
+    chatInput(el) {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 120) + "px";
+      $("#send-btn").disabled = !el.value.trim() || ui.typing;
+    },
     chatKey(e) {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -834,25 +869,33 @@
       render();
     },
     exportData() {
-      const blob = new Blob([JSON.stringify(db, null, 2)], { type: "application/json" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "nijo-data.json";
-      a.click();
-      URL.revokeObjectURL(a.href);
-      toast("Everything downloaded as JSON");
+      if (ui.exporting) return;
+      ui.exporting = true;
+      render();
+      setTimeout(() => {
+        const blob = new Blob([JSON.stringify(db, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "nijo-data.json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        ui.exporting = false;
+        render();
+        toast("Downloaded as nijo-data.json");
+      }, 600);
     },
     setDeleteConfirm(v) {
-      const wasReady = ui.deleteConfirm.trim().toUpperCase() === "DELETE";
+      const wasReady = ui.deleteConfirm.trim().toLowerCase() === "delete";
       ui.deleteConfirm = v;
-      if (wasReady !== (v.trim().toUpperCase() === "DELETE")) render();
+      if (wasReady !== (v.trim().toLowerCase() === "delete")) render();
     },
     deleteAccount() {
-      if (ui.deleteConfirm.trim().toUpperCase() !== "DELETE") return;
+      if (ui.deleteConfirm.trim().toLowerCase() !== "delete") return;
       clearStore();
       Object.assign(ui, {
         activeThreadId: null, termsAccepted: false, dataConsent: false, firstMood: null,
-        phoneDraft: "", deleteConfirm: "", careCard: false, limitHit: false, pendingLanguage: "Hinglish",
+        phoneDraft: "", phoneError: "", otpDigits: ["", "", "", "", "", ""], otpError: "",
+        deleteConfirm: "", careCard: false, limitHit: false, pendingLanguage: null,
       });
       go("language");
       toast("Deleted. Nothing of yours is left.");
@@ -888,12 +931,20 @@
   let resendTimer = null;
   function render() {
     const fn = screens[ui.screen] || screens.threads;
-    $("#app").innerHTML = fn() + (ui.careCard ? careCard() : "");
+    $("#app").innerHTML = fn();
     if (ui.screen === "chat") scrollChat();
+
+    // Mounted only on the transition, so the sheet animates in once and then
+    // sits still while the conversation behind it keeps updating.
+    const overlayRoot = $("#overlay-root");
+    const mounted = !!overlayRoot.firstChild;
+    if (ui.careCard && !mounted) overlayRoot.innerHTML = careCard();
+    else if (!ui.careCard && mounted) overlayRoot.innerHTML = "";
 
     clearInterval(resendTimer);
     if (ui.screen === "otp") {
-      $("#otp0")?.focus();
+      const firstEmpty = ui.otpDigits.findIndex((d) => !d);
+      $("#otp" + (firstEmpty === -1 ? 5 : firstEmpty))?.focus();
       const tick = () => {
         if (ui.screen !== "otp") return clearInterval(resendTimer);
         const el = $("#resend");

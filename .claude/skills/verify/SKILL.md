@@ -33,10 +33,13 @@ read it with `page.evaluate(() => JSON.parse(sessionStorage.getItem(...)))`.
 
 ## Flows worth driving
 
-- Onboarding, in this order: splash (auto-routes after ~900 ms) → language
-  (Hinglish preselected) → phone (any 6+ digits) → OTP (any input passes) →
-  consent (button gated on **both** checkboxes; mood optional) →
-  name companion → auto-created untitled thread → chat.
+- Onboarding, in this order: splash (wordmark only, auto-routes after ~900 ms)
+  → language (**nothing preselected**, Continue disabled until a choice; rows
+  read `Hinglish` / `हिन्दी` / `മലയാളം` / `English`, so don't select on the
+  Latin word "Malayalam") → phone (Continue gated on exactly 10 digits; blur
+  with a partial number shows an inline error) → OTP (`#otpN`, an error keeps
+  the digits) → consent (Continue gated on **both** checkboxes **and** a mood)
+  → name companion → auto-created untitled thread → chat.
 - Ordering assertions: `consents[0].accepted_at <= mood_checks[0].captured_at`,
   and `threads.length === 1` with `title === null` after onboarding.
 - Chat: with no Sarvam config the call is skipped and localised fallbacks
@@ -46,9 +49,12 @@ read it with `page.evaluate(() => JSON.parse(sessionStorage.getItem(...)))`.
   app.js, so set it after DOMContentLoaded or overwrite the global).
 - Care card: send a message matching `DISTRESS_PATTERNS` (e.g. "I don't
   want to live"). Assert `.overlay` exists **and** `.chat-scroll` is still
-  visible — it must never replace the chat. Dismisses by scrim click or
-  the ghost button; afterwards `user.distress_flag_at` is set and a
-  "Get help" action appears in the chat header on every thread.
+  visible — it must never replace the chat. It mounts into `#overlay-root`,
+  not `#app`, so it must stay perfectly still while the reply streams behind
+  it; sample `.care-card` `getBoundingClientRect().top` across the stream to
+  catch a re-animation regression. Dismisses by scrim click or the ghost
+  button; afterwards `user.distress_flag_at` is set and a "Get help" action
+  appears in the chat header on every thread.
 - Thread list: Settings → "Load sample threads" seeds 3 more, one of them
   older than 7 days so `.thread-row.dormant` renders.
 - Settings: rename companion, change language, export (blob download —
@@ -56,6 +62,10 @@ read it with `page.evaluate(() => JSON.parse(sessionStorage.getItem(...)))`.
   no `window.confirm`), sign out.
 - Session check: `page.reload()` after onboarding should land on the
   thread list, not the language screen.
+- Design conformance worth re-asserting from computed styles: no element
+  with `text-transform: uppercase`; companion bubbles are white with a
+  `#5b8c7e` left accent (never a green fill); `.care-card` uses `#c75d52`
+  only as its top border; the delete row is care red.
 
 ## Gotchas
 

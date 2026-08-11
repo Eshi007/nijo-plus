@@ -27,7 +27,19 @@ Ten screens, matching the spec: `Splash`, `LanguageSelect`, `PhoneEntry`,
 `OtpEntry`, `ConsentAndMood`, `NameCompanion`, `ThreadList`, `Chat`, `Settings`,
 and the `CareCard` overlay.
 
-Why it's ordered this way:
+## Design
+
+Follows the screen design prompts: warm cream `#FBF7F1`, orange `#F0742A` for
+actions, **companion green `#5B8C7E` for the AI's presence**, and **care red
+`#C75D52` for distress moments only, never decoration**. Fraunces for display,
+Inter for body — with Noto Sans Devanagari and Noto Sans Malayalam behind both,
+since neither Latin face covers those scripts. Sentence case everywhere; line
+height left generous for taller glyphs.
+
+No streaks, badges, counters, progress rings or unread indicators exist
+anywhere in the app, by design.
+
+Why the flow is ordered this way:
 
 - **Language before terms.** DPDP requires the notice to be understandable to
   the person consenting. The choice is held locally and written to the user row
@@ -35,12 +47,16 @@ Why it's ordered this way:
 - **Consent writes before the mood write.** Mood is personal data.
 - **Two separate checkboxes, one page.** Terms acceptance and data-processing
   consent are separately affirmable; a single blanket tick is the pattern the
-  Act was written against.
+  Act was written against. Both sit above the fold, and Continue needs both
+  ticks *and* a mood.
 - **The first thread is auto-created and untitled.** Nobody in distress wants to
   file a ticket before they can speak. "New problem" only appears once a thread
   exists.
 - **The care card is an overlay, never a replacement.** The conversation stays
-  visible underneath it.
+  visible underneath it. It mounts outside `#app` so re-rendering the chat
+  behind it never restarts its entrance animation. Care red appears as a single
+  accent line, not a wash; there is no emergency iconography and the word
+  "crisis" appears nowhere.
 - **No badges, counts, streaks or nudges** anywhere in the thread list.
 
 ## Chat sequence
